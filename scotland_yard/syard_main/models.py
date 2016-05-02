@@ -9,13 +9,15 @@ from django.utils.encoding import python_2_unicode_compatible
 
 @python_2_unicode_compatible
 class UserProfile(models.Model):
-    """Define User Profile model"""
+    """Define User Profile model."""
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         related_name="profile"
     )
     friends = models.ManyToManyField(
         "self",
+        related_name='friend_of',
         null=True,
         blank=True,
     )
@@ -30,19 +32,18 @@ class UserProfile(models.Model):
 
     def __str__(self):
         """Return string output of username."""
-        return self.user.get_full_name() or self.username
+        return self.user.get_full_name() or self.user.username
 
     @property
     def is_active(self):
-        """
-        Return a boolean value indicating
-        whether the profile's user is active.
-        """
+        """Return a boolean value indicating whether User is active."""
         return self._is_active
 
 
 @python_2_unicode_compatible
 class Game(models.Model):
+    """Game model."""
+
     host = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name="host",
@@ -52,23 +53,23 @@ class Game(models.Model):
     complete = models.BooleanField(default=False)
     winner = models.OneToOneField(
         settings.AUTH_USER_MODEL,
+        related_name='won',
         null=True,
         default=None,
-        related_name="won"
     )
 
     def turn_number(self):
+        """Turn Number."""
         return self.rounds.objects.count()
 
     def _piece_location(self, piece):
         """
-        Accept a string with the name of the piece (color or mrx)xs
-        and return the most recent location of a piece.
-        """
+        Return most recent location of a piece.
 
+        Accept a string with the name of the piece (color or mrx).
+        """
         loc = "".join([piece, "_loc"])
         qs = self.rounds.all()
-        import pdb; pdb.set_trace()
 
     def __str__(self):
         """Return string output of username."""
