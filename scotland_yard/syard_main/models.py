@@ -19,11 +19,11 @@ class UserProfile(models.Model):
         null=True,
         blank=True,
     )
-    games = models.ManyTomanyField(
+    games = models.ManyToManyField(
         "Game",
         related_name='player',
         null=True,
-        Blank=True,
+        blank=True,
         db_index=True
     )
     date_created = models.DateTimeField(auto_now_add=True)
@@ -44,7 +44,7 @@ class UserProfile(models.Model):
 @python_2_unicode_compatible
 class Game(models.Model):
     host = models.ForeignKey(
-        user=settings.AUTH_USER_MODEL,
+        settings.AUTH_USER_MODEL,
     )
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
@@ -53,20 +53,44 @@ class Game(models.Model):
         settings.AUTH_USER_MODEL,
         null=True,
         default=None,
+        related_name="won"
     )
+
+    def turn_number(self):
+        return self.rounds.objects.count()
+
+    def _piece_location(self, piece):
+        """
+        Accept a string with the name of the piece (color or mrx)xs
+        and return the most recent location of a piece.
+        """
+
+        loc = "".join(piece, "_loc")
+        qs = self.rounds.objects.only(loc)
+        import pdb; pdb.set_trace()
+
+    def __str__(self):
+        """Return string output of username."""
+        return self.id
 
 
 @python_2_unicode_compatible
 class Round(models.Model):
     game = models.ForeignKey(
-        game=Game,
-        default=0)
+        Game,
+    )
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
     mrx_loc = models.IntegerField(null=True)
     red_loc = models.IntegerField(null=True)
     yellow_loc = models.IntegerField(null=True)
     green_loc = models.IntegerField(null=True)
     blue_loc = models.IntegerField(null=True)
     purple_loc = models.IntegerField(null=True)
+
+    def __str__(self):
+        """Return string output of username."""
+        return "game: {}, turn: {}".format(self.game.id, self.id)
 
     def get_active_piece(self):
         """Return the piece (x, r, y, g, b, p) to move next"""
