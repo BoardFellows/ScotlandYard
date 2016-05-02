@@ -37,19 +37,34 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
 
 class GameSerializer(serializers.HyperlinkedModelSerializer):
     """Serialization of games."""
-
+    
     # def get_players(self, obj):
     #     return User.objects.filter(user=obj.players.user)
 
     def get_winner(self, obj):
         return User.objects.filter(username=obj.winner.username)
 
+    def get_round(self, obj):
+        return Round.objects.filter(id=obj.id)
+
     class Meta:
         """Meta."""
 
         model = Game
-        fields = ('url', 'id', 'host','date_created', 'date_modified', 'complete', 'winner')
+        fields = ('url', 'id', 'host', 'round', 'date_created', 'date_modified', 'complete', 'winner')
 
+
+class RoundSerializer(serializers.HyperlinkedModelSerializer):
+
+    def get_game(self, obj):
+        return Game.objects.get(game=obj.game)
+
+    class Meta:
+        """Meta."""
+
+        model = Round
+        fields = ('game', 'mrx_loc', 'red_loc', 'yellow_loc',
+            'green_loc', 'blue_loc', 'purple_loc', 'complete')
 
 # class PlayerSerializer(serializers.HyperlinkedModelSerializer):
 #     """Serialization of Player."""
@@ -64,18 +79,6 @@ class GameSerializer(serializers.HyperlinkedModelSerializer):
 #         fields = ('owner', 'tokens', 'location')
 # player num to keep track of p1 vs p2?
 # player role
-class RoundSerializer(serializers.HyperlinkedModelSerializer):
-
-    def get_game(self, obj):
-        return Game.objects.get(game=obj.game)
-
-    class Meta:
-        """Meta."""
-
-        model = Round
-        fields = ('game', 'mrx_loc', 'red_loc', 'yellow_loc',
-            'green_loc', 'blue_loc', 'purple_loc', 'complete')
-
 
 # UNTOUCHABLE SERIALIZERS. These models don't change.
 # class BoardSerializer(serializers.HyperlinkedModelSerializer):
