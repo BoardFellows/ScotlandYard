@@ -28,19 +28,9 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 #         """Meta."""
 
 #         model = Game
-#         fields = ('url', 'id', 'players', 'users', 'turns', 'complete', 'winner')
+#         fields = ('url', 'id', 'host', 'players', 'date_created', 'date_modified, 'turns', 'complete', 'winner')
 
 
-# class BoardSerializer(serializers.HyperlinkedModelSerializer):
-#     """Serialization of Boards."""
-
-#     nodes = serializers.HyperlinkedRelatedField(many=True, view_name='node-detail', read_only=True)
-
-#     class Meta:
-#         """Meta."""
-
-#         model = Board
-#         fields = ('id', nodes')
 # do we want an id on this field?
 
 
@@ -57,7 +47,28 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 #         fields = ('owner', 'tokens', 'location')
 # player num to keep track of p1 vs p2?
 # player role
+# class RoundSerializer(serializers.HyperlinkedModelSerializer):
+    # game = serializers.HyperlinkedRelatedField(many=False, view_name='game-detail')
 
+    # class Meta:
+    #     """Meta."""
+
+    #     model = Round
+    #     fields = ('game', 'mrx_loc', 'red_loc', 'yellow_loc',
+    #         'green_loc', 'blue_loc', 'purple_loc', 'complete')
+
+
+# UNTOUCHABLE SERIALIZERS. These models don't change.
+# class BoardSerializer(serializers.HyperlinkedModelSerializer):
+#     """Serialization of Boards."""
+
+#     nodes = serializers.HyperlinkedRelatedField(many=True, view_name='node-detail', read_only=True)
+
+#     class Meta:
+#         """Meta."""
+
+#         model = Board
+#         fields = ('nodes')
 
 # class NodeSerializer(serializers.HyperlinkedModelSerializer):
 #     """Serialization of Boards."""
