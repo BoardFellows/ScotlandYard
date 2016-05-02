@@ -1,37 +1,54 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from syard_main.models import UserProfile, Game
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     """Serialization of Users."""
 
-    # games = serializers.HyperlinkedRelatedField(many=True, view_name='game-detail', read_only=False)
-    # friends = serializers.HyperlinkedRelatedField(many=True, view_name='user-detail', read_only=False)
-
     class Meta:
         """Meta."""
 
         model = User
-        fields = ('url', 'id', 'username', 'email')
-        # add games and friends
+        fields = ('url', 'id', 'username', 'email', 'profile')
 
 
-# class GameSerializer(serializers.HyperlinkedModelSerializer):
-#     """Serialization of games."""
+class ProfileSerializer(serializers.HyperlinkedModelSerializer):
+    """Serialization of Profiles."""
 
-#     players = serializers.HyperlinkedRelatedField(many=True, view_name='player-detail', read_only=True)
-#     users = serializers.HyperlinkedRelatedField(many=True, view_name='user-detail', read_only=True)
-#     winner = serializers.HyperlinkedRelatedField(many=False, view_name='winner-detail', read_only=False)
-#     # do we want players or users?
+    def get_user(self, obj):
+        """Get User."""
+        return User.objects.get(user=obj.user)
 
-#     class Meta:
-#         """Meta."""
+    def get_friends(self, obj):
+        """Get Friends."""
+        return User.objects.filter(friend_of=obj.user)
 
-#         model = Game
-#         fields = ('url', 'id', 'host', 'players', 'date_created', 'date_modified, 'turns', 'complete', 'winner')
+    def get_games(self, obj):
+        """Get Games."""
+        return Game.objects.filter(user=obj.player)
+
+    class Meta:
+        """Meta."""
+
+        model = UserProfile
+        fields = ('url', 'user', 'friends', 'games')
 
 
-# do we want an id on this field?
+class GameSerializer(serializers.HyperlinkedModelSerializer):
+    """Serialization of games."""
+
+    # def get_players(self, obj):
+    #     return User.objects.filter(user=obj.players.user)
+
+    def get_winner(self, obj):
+        return User.objects.filter(username=obj.winner.username)
+
+    class Meta:
+        """Meta."""
+
+        model = Game
+        fields = ('url', 'id', 'host','date_created', 'date_modified', 'complete', 'winner')
 
 
 # class PlayerSerializer(serializers.HyperlinkedModelSerializer):

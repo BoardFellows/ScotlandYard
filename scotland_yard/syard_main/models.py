@@ -16,21 +16,22 @@ class UserProfile(models.Model):
     )
     friends = models.ManyToManyField(
         "self",
+        related_name='friend_of',
         null=True,
         blank=True,
     )
-    games = models.ManyTomanyField(
+    games = models.ManyToManyField(
         "Game",
         related_name='player',
         null=True,
-        Blank=True,
+        blank=True,
         db_index=True
     )
     date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         """Return string output of username."""
-        return self.user.get_full_name() or self.username
+        return self.user.get_full_name() or self.user.username
 
     @property
     def is_active(self):
@@ -44,13 +45,14 @@ class UserProfile(models.Model):
 @python_2_unicode_compatible
 class Game(models.Model):
     host = models.ForeignKey(
-        user=settings.AUTH_USER_MODEL,
+        settings.AUTH_USER_MODEL,
     )
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     complete = models.BooleanField(default=False)
     winner = models.OneToOneField(
         settings.AUTH_USER_MODEL,
+        related_name='won',
         null=True,
         default=None,
     )
@@ -59,7 +61,9 @@ class Game(models.Model):
 @python_2_unicode_compatible
 class Round(models.Model):
     game = models.ForeignKey(
-        game=Game,
+        # game=Game,
+        'Game',
+        on_delete=models.CASCADE,
         default=0)
     mrx_loc = models.IntegerField(null=True)
     red_loc = models.IntegerField(null=True)
