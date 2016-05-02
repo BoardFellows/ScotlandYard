@@ -45,6 +45,7 @@ class UserProfile(models.Model):
 class Game(models.Model):
     host = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        related_name="host",
     )
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
@@ -65,19 +66,23 @@ class Game(models.Model):
         and return the most recent location of a piece.
         """
 
-        loc = "".join(piece, "_loc")
-        qs = self.rounds.objects.only(loc)
+        loc = "".join([piece, "_loc"])
+        qs = self.rounds.objects
         import pdb; pdb.set_trace()
 
     def __str__(self):
         """Return string output of username."""
-        return self.id
+        return str(self.id)
+
+    # def __unicode__(self):
+    #     return unicode(self.some_field) or u''
 
 
 @python_2_unicode_compatible
 class Round(models.Model):
     game = models.ForeignKey(
-        Game,
+        'Game',
+        related_name='rounds',
     )
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
@@ -90,7 +95,7 @@ class Round(models.Model):
 
     def __str__(self):
         """Return string output of username."""
-        return "game: {}, turn: {}".format(self.game.id, self.id)
+        return "game: {}, turn: {}".format(str(self.game.id), str(self.id))
 
     def get_active_piece(self):
         """Return the piece (x, r, y, g, b, p) to move next"""
