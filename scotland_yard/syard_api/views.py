@@ -1,11 +1,12 @@
 # from django.shortcuts import render
 from rest_framework import viewsets
 from django.contrib.auth.models import User
-from syard_main.models import UserProfile, Game
+from syard_main.models import UserProfile, Game, Round
 from syard_api.serializers import (
     UserSerializer,
     ProfileSerializer,
     GameSerializer,
+    RoundSerializer,
     # PlayerSerializer,
     # BoardSerializer,
     # NodeSerializer,
@@ -32,3 +33,10 @@ class GameViewSet(viewsets.ModelViewSet):
 
     queryset = Game.objects.all()
     serializer_class = GameSerializer
+
+
+class RoundViewSet(viewsets.ModelViewSet):
+    """Provides list and detail actions for user view."""
+
+    queryset = Round.objects.all()
+    serializer_class = RoundSerializer

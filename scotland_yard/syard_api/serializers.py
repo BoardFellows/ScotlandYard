@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from syard_main.models import UserProfile, Game
+from syard_main.models import UserProfile, Game, Round
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -52,7 +52,7 @@ class GameSerializer(serializers.HyperlinkedModelSerializer):
 
 
 # class PlayerSerializer(serializers.HyperlinkedModelSerializer):
-#     """Serialization of Boards."""
+#     """Serialization of Player."""
 
 #     owner = serializers.HyperlinkedRelatedField(many=False, view_name='user-detail', read_only=True)
 #     location = serializers.HyperlinkedRelatedField(many=False, view_name='node-detail', read_only=True)
@@ -64,15 +64,17 @@ class GameSerializer(serializers.HyperlinkedModelSerializer):
 #         fields = ('owner', 'tokens', 'location')
 # player num to keep track of p1 vs p2?
 # player role
-# class RoundSerializer(serializers.HyperlinkedModelSerializer):
-    # game = serializers.HyperlinkedRelatedField(many=False, view_name='game-detail')
+class RoundSerializer(serializers.HyperlinkedModelSerializer):
 
-    # class Meta:
-    #     """Meta."""
+    def get_game(self, obj):
+        return Game.objects.get(game=obj.game)
 
-    #     model = Round
-    #     fields = ('game', 'mrx_loc', 'red_loc', 'yellow_loc',
-    #         'green_loc', 'blue_loc', 'purple_loc', 'complete')
+    class Meta:
+        """Meta."""
+
+        model = Round
+        fields = ('game', 'mrx_loc', 'red_loc', 'yellow_loc',
+            'green_loc', 'blue_loc', 'purple_loc', 'complete')
 
 
 # UNTOUCHABLE SERIALIZERS. These models don't change.
