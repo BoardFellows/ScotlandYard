@@ -70,6 +70,10 @@ class Game(models.Model):
         """
         loc = "".join([piece, "_loc"])
         qs = self.rounds.all()
+        if qs[-1].__getattribute__(loc):
+            return qs[-1].__getattribute__(loc)
+        else:
+            return qs[-2].__getattribute__(loc)
 
     def __str__(self):
         """Return string output of username."""
