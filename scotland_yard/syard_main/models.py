@@ -6,6 +6,13 @@ from django.db import models
 
 from django.utils.encoding import python_2_unicode_compatible
 
+DETECTIVES = [
+    ('det1', 'det1'),
+    ('det2', 'det2'),
+    ('det3', 'det3'),
+    ('det4', 'det4'),
+    ('det5', 'det5'),
+]
 
 @python_2_unicode_compatible
 class UserProfile(models.Model):
@@ -57,6 +64,30 @@ class Game(models.Model):
         null=True,
         default=None,
     )
+    # mrx = models.OneToOneField(
+    #     'MrX',
+    #     related_name="game"
+    # )
+    # det1 = models.OneToOneField(
+    #     'Detective',
+    #     related_name="game"
+    # )
+    # det2 = models.OneToOneField(
+    #     'Detective',
+    #     related_name="game"
+    # )
+    # det3 = models.OneToOneField(
+    #     'Detective',
+    #     related_name="game"
+    # )
+    # det4 = models.OneToOneField(
+    #     'Detective',
+    #     related_name="game"
+    # )
+    # det5 = models.OneToOneField(
+    #     'Detective',
+    #     related_name="game"
+    # )
 
     def turn_number(self):
         """Turn Number."""
@@ -78,11 +109,11 @@ class Game(models.Model):
     def get_locations(self):
         return {
             'mrx': self._piece_location('mrx'),
-            'red': self._piece_location('red'),
-            'yellow': self._piece_location('yellow'),
-            'green': self._piece_location('green'),
-            'blue': self._piece_location('blue'),
-            'purple': self._piece_location('purple'),
+            'det1': self._piece_location('det1'),
+            'det2': self._piece_location('det2'),
+            'det3': self._piece_location('det3'),
+            'det4': self._piece_location('det4'),
+            'det5': self._piece_location('det5'),
         }
 
     def __str__(self):
@@ -102,11 +133,11 @@ class Round(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     mrx_loc = models.IntegerField(null=True)
-    red_loc = models.IntegerField(null=True)
-    yellow_loc = models.IntegerField(null=True)
-    green_loc = models.IntegerField(null=True)
-    blue_loc = models.IntegerField(null=True)
-    purple_loc = models.IntegerField(null=True)
+    det1_loc = models.IntegerField(null=True)
+    det2_loc = models.IntegerField(null=True)
+    det3_loc = models.IntegerField(null=True)
+    det4_loc = models.IntegerField(null=True)
+    det5_loc = models.IntegerField(null=True)
 
     def __str__(self):
         """Return string output of username."""
@@ -119,3 +150,22 @@ class Round(models.Model):
     def complete(self):
         """Return True if all rounds in field are truthy, else false."""
         pass
+
+
+@python_2_unicode_compatible
+class MrX(models.Model):
+    taxi = models.IntegerField(default=4)
+    bus = models.IntegerField(default=3)
+    underground = models.IntegerField(default=3)
+    black = models.IntegerField(default=5)
+    x2 = models.IntegerField(default=2)
+    game = models.OneToOneField(related_name='mrx')
+
+
+@python_2_unicode_compatible
+class Detective(models.Model):
+    taxi = models.IntegerField(default=10)
+    bus = models.IntegerField(default=8)
+    underground = models.IntegerField(default=4)
+    game = models.OneToOneField(related_name='dets')
+    role = models.CharField(choices=DETECTIVES)
