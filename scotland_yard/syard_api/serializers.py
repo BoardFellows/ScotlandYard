@@ -16,18 +16,6 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     """Serialization of Profiles."""
 
-    def get_user(self, obj):
-        """Get User."""
-        return User.objects.get(user=obj.user)
-
-    def get_friends(self, obj):
-        """Get Friends."""
-        return User.objects.filter(friend_of=obj.user)
-
-    def get_games(self, obj):
-        """Get Games."""
-        return Game.objects.filter(user=obj.player)
-
     class Meta:
         """Meta."""
 
@@ -37,27 +25,16 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
 
 class GameSerializer(serializers.HyperlinkedModelSerializer):
     """Serialization of games."""
-    
-    # def get_players(self, obj):
-    #     return User.objects.filter(user=obj.players.user)
-
-    def get_winner(self, obj):
-        return User.objects.filter(username=obj.winner.username)
-
-    def get_round(self, obj):
-        return Round.objects.filter(id=obj.id)
 
     class Meta:
         """Meta."""
 
         model = Game
-        fields = ('url', 'id', 'host', 'round', 'date_created', 'date_modified', 'complete', 'winner')
+        fields = ('url', 'id', 'rounds', 'host', 'date_created', 'date_modified', 'complete', 'winner')
 
 
 class RoundSerializer(serializers.HyperlinkedModelSerializer):
-
-    def get_game(self, obj):
-        return Game.objects.get(game=obj.game)
+    """Serialization of rounds."""
 
     class Meta:
         """Meta."""
