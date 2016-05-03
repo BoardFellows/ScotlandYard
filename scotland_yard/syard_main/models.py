@@ -23,6 +23,15 @@ STARTING_NODES = [
 ]
 
 
+class ActiveUserManager(models.Manager):
+    """Query User Profile attached to an active user."""
+
+    def get_queryset(self):
+        """Return query set of profiles with active users."""
+        queryset = super(ActiveUserManager, self).get_queryset()
+        return queryset.filter(user__is_active=True)
+
+
 @python_2_unicode_compatible
 class UserProfile(models.Model):
     """Define User Profile model."""
@@ -33,14 +42,12 @@ class UserProfile(models.Model):
     )
     friends = models.ManyToManyField(
         "self",
-        related_name='friend_of',
-        null=True,
+        related_name='friends',
         blank=True,
     )
     games = models.ManyToManyField(
         "Game",
-        related_name='player',
-        null=True,
+        related_name='users',
         blank=True,
         db_index=True
     )
@@ -55,13 +62,16 @@ class UserProfile(models.Model):
         """Return a boolean value indicating whether User is active."""
         return self._is_active
 
+    active = ActiveUserManager()
+    objects = models.Manager()
+
 
 @python_2_unicode_compatible
 class Game(models.Model):
     """Game model."""
 
     host = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        UserProfile,
         related_name="host",
     )
     date_created = models.DateTimeField(auto_now_add=True)
@@ -71,32 +81,39 @@ class Game(models.Model):
         settings.AUTH_USER_MODEL,
         related_name='won',
         null=True,
-        default=None,
     )
-    # mrx = models.OneToOneField(
-    #     'MrX',
-    #     related_name="game"
-    # )
-    # det1 = models.OneToOneField(
-    #     'Detective',
-    #     related_name="game"
-    # )
-    # det2 = models.OneToOneField(
-    #     'Detective',
-    #     related_name="game"
-    # )
-    # det3 = models.OneToOneField(
-    #     'Detective',
-    #     related_name="game"
-    # )
-    # det4 = models.OneToOneField(
-    #     'Detective',
-    #     related_name="game"
-    # )
-    # det5 = models.OneToOneField(
-    #     'Detective',
-    #     related_name="game"
-    # )
+
+    player_1 = models.ForeignKey(
+        UserProfile,
+        related_name='player_1',
+        null=True,
+        blank=True
+    )
+
+    player_2 = models.ForeignKey(
+        UserProfile,
+        related_name='player_2',
+        null=True,
+        blank=True
+    )
+
+    player1_is_x = models.BooleanField(default=True)
+
+    # @property
+    # def player_1(self):
+    #     try:
+    #         p1 = self.players.all()[0]
+    #         return p1
+    #     except(IndexError, KeyError):
+    #         return "player 1 unset"
+
+    # @property
+    # def player_2(self):
+    #     try:
+    #         p2 = self.players.all()[1]
+    #         return p2
+    #     except(IndexError, KeyError):
+    #         return "player 2 unset"
 
     def __str__(self):
         """Return string output of username."""
@@ -104,7 +121,7 @@ class Game(models.Model):
 
     def turn_number(self):
         """Turn Number."""
-        return self.rounds.objects.count()
+        return self.rounds.count()
 
     def _piece_location(self, piece):
         """Return most recent location of a piece, identified by name."""
@@ -147,6 +164,7 @@ class Round(models.Model):
     det3_loc = models.IntegerField(null=True)
     det4_loc = models.IntegerField(null=True)
     det5_loc = models.IntegerField(null=True)
+    num = models.IntegerField(default=0)
 
     def __str__(self):
         """Return string output of username."""
@@ -163,18 +181,36 @@ class Round(models.Model):
 
 @python_2_unicode_compatible
 class MrX(models.Model):
+    game = models.OneToOneField('Game', related_name='mrx', null=True)
     taxi = models.IntegerField(default=4)
     bus = models.IntegerField(default=3)
     underground = models.IntegerField(default=3)
     black = models.IntegerField(default=5)
     x2 = models.IntegerField(default=2)
-    game = models.OneToOneField(related_name='mrx')
+
+    def __str__(self):
+        """Return string output of MrX."""
+        return "game: {}, turn: {}, position: {}".format(
+            str(self.game.id),
+            str(self.game.turn_number()),
+            str(self.game._piece_location('mrx'))
+        )
+        #  msg = ()
+        #  return "game: {}, turn: {}, position: {},/n Tickets: /n taxi: {}, bus: {}, undergroud: {}, black: {}, x2: {}".format(str(self.game.id), str(self.game.turn_number()), str(self.game._piece_location('mrx')), str(self.taxi), str(self.bus), str(self.underground), str(self.black), str(self.x2))))
 
 
 @python_2_unicode_compatible
 class Detective(models.Model):
+    game = models.ForeignKey('Game', related_name='dets')
+    role = models.CharField(max_length=10, choices=DETECTIVES, null=True, default=None)
     taxi = models.IntegerField(default=10)
     bus = models.IntegerField(default=8)
     underground = models.IntegerField(default=4)
-    game = models.OneToOneField(related_name='dets')
-    role = models.CharField(choices=DETECTIVES)
+
+    def __str__(self):
+        """Return string output of MrX."""
+        return "game: {}, turn: {}, position: {}".format(
+            str(self.game.id),
+            str(self.game.turn_number()),
+            str(self.game._piece_location('{}'.format(self.role)))
+        )
