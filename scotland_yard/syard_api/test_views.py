@@ -40,7 +40,7 @@ class EndPointTests(APITestCase):
             username='ptrompeter',
             email='test@foo.com'
         )
-        self.expected_user_keys = ['url', 'id', 'username', 'email', 'profile']
+        self.expected_user_keys = ['url', 'id', 'username', 'email']
         self.game1 = GameFactory.create(
             host=self.selena,
             winner=self.patrick,
@@ -74,14 +74,11 @@ class EndPointTests(APITestCase):
         data = {'username': 'Phil', 'email': 'test@foo.com', 'password': 'something'}
         client = APIClient(enforce_csrf_checks=True)
         request = client.post(url, data, format='json')
-        # factory = APIRequestFactory()
-        # request = factory.post(url, data, content_type='json')
-        # self.assertEqual(request.status_code, status.HTTP_201_CREATED)
-        # self.assertEqual(User.objects.count(), 3)
+        self.assertEqual(request.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(User.objects.count(), 3)
 
     def test_get_game_list(self):
         url = '/games/'
         request = self.client.get(url)
         self.assertEqual(request.status_code, status.HTTP_200_OK)
-        self.assertIn(ordself.game1, request.data[0])
 
