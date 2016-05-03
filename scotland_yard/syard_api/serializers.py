@@ -12,6 +12,16 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         model = User
         fields = ('url', 'id', 'username', 'email', 'password')
 
+    def create(self, validated_data):
+        """Modified create method to encrypt password to save in db."""
+        user = User(
+            email=validated_data['email'],
+            username=validated_data['username']
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
 
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     """Serialization of Profiles."""
@@ -40,8 +50,10 @@ class RoundSerializer(serializers.HyperlinkedModelSerializer):
         """Meta."""
 
         model = Round
-        fields = ('game', 'mrx_loc', 'red_loc', 'yellow_loc',
-            'green_loc', 'blue_loc', 'purple_loc', 'complete')
+        fields = (
+            'game', 'mrx_loc', 'red_loc', 'yellow_loc',
+            'green_loc', 'blue_loc', 'purple_loc', 'complete'
+        )
 
 # class PlayerSerializer(serializers.HyperlinkedModelSerializer):
 #     """Serialization of Player."""

@@ -74,9 +74,6 @@ class Game(models.Model):
         """Return string output of username."""
         return str(self.id)
 
-    # def __unicode__(self):
-    #     return unicode(self.some_field) or u''
-
 
 @python_2_unicode_compatible
 class Round(models.Model):
