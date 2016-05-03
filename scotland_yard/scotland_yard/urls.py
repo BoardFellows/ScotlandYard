@@ -4,7 +4,7 @@ from django.contrib import admin
 from syard_main.views import home_view
 from syard_api import views
 
-router = DefaultRouter()
+router = DefaultRouter(trailing_slash=False)
 router.register('users', views.UserViewSet)
 router.register('profiles', views.ProfileViewSet)
 router.register('games', views.GameViewSet)
