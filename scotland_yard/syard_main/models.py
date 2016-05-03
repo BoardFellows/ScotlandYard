@@ -8,10 +8,10 @@ from django.utils.encoding import python_2_unicode_compatible
 class UserProfile(models.Model):
     """Define User Profile model."""
 
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        related_name="profile",
-    )
+    # user = models.OneToOneField(
+    #     settings.AUTH_USER_MODEL,
+    #     related_name="profile",
+    # )
     friends = models.ManyToManyField(
         "self",
         related_name='friend_of',
