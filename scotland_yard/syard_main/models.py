@@ -75,6 +75,16 @@ class Game(models.Model):
         else:
             return qs[-2].__getattribute__(loc)
 
+    def get_locations(self):
+        return {
+            'mrx': self._piece_location('mrx'),
+            'red': self._piece_location('red'),
+            'yellow': self._piece_location('yellow'),
+            'green': self._piece_location('green'),
+            'blue': self._piece_location('blue'),
+            'purple': self._piece_location('purple'),
+        }
+
     def __str__(self):
         """Return string output of username."""
         return str(self.id)
