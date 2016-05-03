@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 from syard_main.models import UserProfile, Game, Round
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+# class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer (serializers.ModelSerializer):
     """Serialization of Users."""
 
     class Meta:
@@ -33,23 +34,32 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('url', 'user', 'friends', 'games')
 
 
-class GameSerializer(serializers.HyperlinkedModelSerializer):
+# class GameSerializer(serializers.HyperlinkedModelSerializer):
+class GameSerializer(serializers.ModelSerializer):
     """Serialization of games."""
+
+    # host = UserSerializer()
+    # host = serializers.PrimaryKeyRelatedField()
+    winner = UserSerializer()
+    # rounds = RoundSerializer()
 
     class Meta:
         """Meta."""
 
         model = Game
+        depth = 1
         fields = ('url', 'id', 'rounds', 'host', 'date_created', 'date_modified', 'complete', 'winner')
 
 
-class RoundSerializer(serializers.HyperlinkedModelSerializer):
+# class RoundSerializer(serializers.HyperlinkedModelSerializer):
+class RoundSerializer(serializers.ModelSerializer):
     """Serialization of rounds."""
 
     class Meta:
         """Meta."""
 
         model = Round
+        depth = 1
         fields = (
             'game', 'mrx_loc', 'red_loc', 'yellow_loc',
             'green_loc', 'blue_loc', 'purple_loc', 'complete'
