@@ -11,6 +11,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         related_name="profile",
+        null=True,
+        blank=True,
     )
     friends = models.ManyToManyField(
         "self",
