@@ -5,6 +5,8 @@ from django.test import TestCase
 
 import factory
 
+from syard_main.board import BOARD
+
 from syard_main.models import Detective, Game, MrX, Round, UserProfile
 
 """Test UserProfile model."""
@@ -70,7 +72,6 @@ class ExistingUserCase(TestCase):
         )
         self.user_2.set_password('moresecret')
 
-
     def test_user_has_profile(self):
         """Test if use has a profile."""
         self.assertTrue(self.user_1.profile)
@@ -106,7 +107,8 @@ class ExistingUserCase(TestCase):
         jim_pr = self.user_1.profile
         jim_pr.friends.add(self.user_2.profile)
         self.assertEqual(jim_pr.friends.all()[0], self.user_2.profile)
-        self.assertEqual(self.user_2.profile.friends.all()[0], self.user_1.profile)
+        self.assertEqual(self.user_2.profile.friends.all()[0],
+                         self.user_1.profile)
 
     def test_not_friends(self):
         """Test that a user is not a friend of another profile."""
@@ -208,3 +210,36 @@ class GameCase(TestCase):
         self.assertTrue(self.game_1.rounds.first().det3_loc)
         self.assertTrue(self.game_1.rounds.first().det4_loc)
         self.assertTrue(self.game_1.rounds.first().det5_loc)
+
+"""Test BOARD"""
+
+
+class BoardCase(TestCase):
+    """Test that all routes on nodes with routes on partner nodes."""
+    def setUp(self):
+
+        self.board = BOARD
+
+    def test_board_integrity(self):
+        """Confirm that every connection is symmetrical"""
+        for node_name, node in self.board.items():
+            for travel_type, destinations in node.items():
+                for destination in destinations:
+                    """Assert that node does not contain itself."""
+                    self.assertNotEqual(node_name, destination)
+                    """Assert that connections are symmetrical"""
+                    self.assertIn(node_name, self.board[destination][travel_type])
+
+    def test_board_is_connected(self):
+        """Ensure that there are no unconnected islands on the board"""
+        visited = set()
+        stack = [next(iter(self.board))]
+        # perform a depth-first traversal
+        while stack:
+            node = stack.pop()
+            if node not in visited:
+                visited.add(node)
+                for neighbors in self.board[node].values():
+                    stack.extend(neighbors)
+        # check that we visited all the nodes
+        self.assertEqual(len(visited), len(self.board))

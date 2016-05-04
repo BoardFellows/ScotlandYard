@@ -4,7 +4,6 @@ from syard_main.models import UserProfile, Game, Round
 from rest_framework.authtoken.models import Token
 
 
-
 class ProfileSerializer(serializers.ModelSerializer):
     """Serialization of Profiles."""
 
@@ -18,13 +17,14 @@ class ProfileSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     """Serialization of Users."""
 
-
     class Meta:
         """Meta."""
 
         model = User
         depth = 1
-        fields = ('id', 'username', 'email', 'password', 'profile')
+        fields = (
+            'id', 'username', 'email', 'password', 'profile',
+        )
 
     def create(self, validated_data):
         """Modified create method to encrypt password to save in db."""
@@ -34,9 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
         user.set_password(validated_data['password'])
         user.save()
-        UserProfile.objects.create(user=user)
         return user
-
 
 
 class GameSerializer(serializers.ModelSerializer):
