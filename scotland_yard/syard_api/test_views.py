@@ -40,9 +40,9 @@ class EndPointTests(APITestCase):
             username='ptrompeter',
             email='test@foo.com'
         )
-        self.expected_user_keys = ['url', 'id', 'username', 'email', 'profile']
+        self.expected_user_keys = ['id', 'username', 'email', 'password', 'profile']
         self.game1 = GameFactory.create(
-            host=self.selena,
+            host=self.selena.profile,
             winner=self.patrick,
             complete=True,
 
@@ -81,4 +81,3 @@ class EndPointTests(APITestCase):
         url = '/games/'
         request = self.client.get(url)
         self.assertEqual(request.status_code, status.HTTP_200_OK)
-

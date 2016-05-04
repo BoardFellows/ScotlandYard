@@ -14,16 +14,16 @@ from syard_main.models import Detective, Game, MrX, Round, UserProfile
 logger = logging.getLogger(__name__)
 
 
-# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
-# def make_user_profile(sender, **kwargs):
-#     """Create a related user profile when a new user is created."""
-#     if kwargs.get('created', False):
-#         try:
-#             new_profile = UserProfile(user=kwargs['instance'])
-#             new_profile.save()
-#         except(KeyError, ValueError):
-#             msg = 'Unable to create Profile for {}'
-#             logger.error(msg.format(kwargs['instance']))
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def make_user_profile(sender, **kwargs):
+    """Create a related user profile when a new user is created."""
+    if kwargs.get('created', False):
+        try:
+            new_profile = UserProfile(user=kwargs['instance'])
+            new_profile.save()
+        except(KeyError, ValueError):
+            msg = 'Unable to create Profile for {}'
+            logger.error(msg.format(kwargs['instance']))
 
 
 @receiver(pre_delete, sender=settings.AUTH_USER_MODEL)
