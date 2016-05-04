@@ -40,7 +40,7 @@ class EndPointTests(APITestCase):
             username='ptrompeter',
             email='test@foo.com'
         )
-        self.expected_user_keys = ['url', 'id', 'username', 'email', 'profile']
+        self.expected_user_keys = ['id', 'username', 'email', 'password', 'profile']
         self.game1 = GameFactory.create(
             host=self.selena.profile,
             winner=self.patrick,

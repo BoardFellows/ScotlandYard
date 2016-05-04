@@ -220,13 +220,21 @@ class BoardCase(TestCase):
 
         self.board = BOARD
 
-    def test_routes(self):
-        for index in range(1, 200):
-            for key in self.board[index]:
-                for item in self.board[index][key]:
-                    print(index)
-                    print(key)
-                    print(self.board[index][key])
-                    print(item)
-                    print(self.board[item][key])
-                    self.assertIn(index, self.board[item][key])
+    # def test_routes(self):
+    #     for index in range(1, 200):
+    #         for key in self.board[index]:
+    #             for item in self.board[index][key]:
+    #                 print(index)
+    #                 print(key)
+    #                 print(self.board[index][key])
+    #                 print(item)
+    #                 print(self.board[item][key])
+    #                 self.assertIn(index, self.board[item][key])
+
+    def test_board_integrity(self):
+        for node_name, node in self.board.items():
+            for travel_type, destinations in node.items():
+                for destination in destinations:
+                    self.assertNotEqual(node_name, destination)
+                    self.assertIn(node_name, self.board[destination][travel_type])
+

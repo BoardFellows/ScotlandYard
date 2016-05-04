@@ -641,12 +641,6 @@ BOARD = {
         'underground': [],
         'river': [],
     },
-    108: {
-        'taxi': [],
-        'bus': [],
-        'underground': [],
-        'river': [],
-    },
     109: {
         'taxi': [96, 97, 110, 124],
         'bus': [],
