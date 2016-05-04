@@ -38,6 +38,34 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+
+class GameSerializer(serializers.ModelSerializer):
+    """Serialization of games."""
+
+    class Meta:
+        """Meta."""
+
+        model = Game
+        depth = 1
+        fields = (
+            'id', 'rounds', 'host', 'date_created',
+            'date_modified', 'player_1', 'player_2',
+            # 'current_player',
+            'turn_number',
+            'complete', 'winner'
+        )
+
+    def create(self, validated_data):
+        """Modified create method to encrypt password to save in db."""
+        host = self.context['request'].user.profile
+        game = Game(
+            host=host,
+            player_1=host
+        )
+        game.save()
+        return game
+
+
 class RoundSerializer(serializers.ModelSerializer):
     """Serialization of rounds."""
 
@@ -49,19 +77,6 @@ class RoundSerializer(serializers.ModelSerializer):
             'mrx_loc', 'det1_loc', 'det2_loc',
             'det3_loc', 'det4_loc', 'det5_loc', 'complete'
         )
-
-class GameSerializer(serializers.ModelSerializer):
-    """Serialization of games."""
-
-
-    class Meta:
-        """Meta."""
-
-        model = Game
-        depth = 1
-        fields = ('url', 'id', 'rounds', 'host', 'date_created', 'date_modified', 'complete', 'winner')
-
-
 
 
 # class BoardSerializer(serializer.ModelSerializer)

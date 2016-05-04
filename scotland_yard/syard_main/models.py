@@ -132,6 +132,8 @@ class Game(models.Model):
         output = [starts.pop(randrange(0, len(starts))) for x in range(6)]
         return output
 
+    # current player
+
 
 @python_2_unicode_compatible
 class Round(models.Model):
