@@ -220,21 +220,26 @@ class BoardCase(TestCase):
 
         self.board = BOARD
 
-    # def test_routes(self):
-    #     for index in range(1, 200):
-    #         for key in self.board[index]:
-    #             for item in self.board[index][key]:
-    #                 print(index)
-    #                 print(key)
-    #                 print(self.board[index][key])
-    #                 print(item)
-    #                 print(self.board[item][key])
-    #                 self.assertIn(index, self.board[item][key])
-
     def test_board_integrity(self):
+        """Confirm that every connection is symmetrical"""
         for node_name, node in self.board.items():
             for travel_type, destinations in node.items():
                 for destination in destinations:
+                    """Assert that node does not contain itself."""
                     self.assertNotEqual(node_name, destination)
+                    """Assert that connections are symmetrical"""
                     self.assertIn(node_name, self.board[destination][travel_type])
 
+    def test_board_is_connected(self):
+        """Ensure that there are no unconnected islands on the board"""
+        visited = set()
+        stack = [next(iter(self.board))]
+        # perform a depth-first traversal
+        while stack:
+            node = stack.pop()
+            if node not in visited:
+                visited.add(node)
+                for neighbors in self.board[node].values():
+                    stack.extend(neighbors)
+        # check that we visited all the nodes
+        self.assertEqual(len(visited), len(self.board))
