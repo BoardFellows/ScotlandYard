@@ -2,11 +2,11 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate, login
 from rest_framework import (
     viewsets,
     generics,
-    permissions
+    permissions,
+    mixins,
 )
 from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth.models import User
@@ -31,24 +31,14 @@ def board_view(request):
     """Return the Board with a get request."""
     data = {'board': {'a': 'b'}}
     return JsonResponse(data)
-mixins.CreateModelMixin, 
-                   mixins.RetrieveModelMixin, 
-                   mixins.UpdateModelMixin,
-                   mixins.DestroyModelMixin,
-                   mixins.ListModelMixin,
-                   GenericViewSet
 
-# class UserViewSet(viewsets.ModelViewSet):
-class UserViewSet(
-    mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    GenericViewSet
-)
+class UserViewSet(viewsets.ModelViewSet):
     """Provides actions for user view."""
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsCreateOrIsOwner,)
 
     def create(self, request):
         response = super(UserViewSet, self).create(request, data=request.data)
@@ -57,8 +47,6 @@ class UserViewSet(
         response['authToken'] = token
         return response
 
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsCreateOrIsOwner,)
 
 
 class GameViewSet(viewsets.ModelViewSet):

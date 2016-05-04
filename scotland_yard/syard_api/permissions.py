@@ -9,6 +9,9 @@ class IsCreateOrIsOwner(permissions.BasePermission):
         """Return Bool representing object permissions."""
         if request.method == "POST":
             return True
-
-        token = Token.objects.get(user=obj.user)
-        return token == request['Authentication'][7:]
+        auth_token = "Token {}".format(Token.objects.get(user=obj))
+        try:
+            httptoken = request.META['HTTP_AUTHORIZATION']
+        except KeyError:
+            return False
+        return auth_token == httptoken
