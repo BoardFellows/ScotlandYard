@@ -5,6 +5,8 @@ from django.test import TestCase
 
 import factory
 
+from syard_main.board import BOARD
+
 from syard_main.models import Detective, Game, MrX, Round, UserProfile
 
 """Test UserProfile model."""
@@ -70,7 +72,6 @@ class ExistingUserCase(TestCase):
         )
         self.user_2.set_password('moresecret')
 
-
     def test_user_has_profile(self):
         """Test if use has a profile."""
         self.assertTrue(self.user_1.profile)
@@ -106,7 +107,8 @@ class ExistingUserCase(TestCase):
         jim_pr = self.user_1.profile
         jim_pr.friends.add(self.user_2.profile)
         self.assertEqual(jim_pr.friends.all()[0], self.user_2.profile)
-        self.assertEqual(self.user_2.profile.friends.all()[0], self.user_1.profile)
+        self.assertEqual(self.user_2.profile.friends.all()[0],
+                         self.user_1.profile)
 
     def test_not_friends(self):
         """Test that a user is not a friend of another profile."""
@@ -208,3 +210,23 @@ class GameCase(TestCase):
         self.assertTrue(self.game_1.rounds.first().det3_loc)
         self.assertTrue(self.game_1.rounds.first().det4_loc)
         self.assertTrue(self.game_1.rounds.first().det5_loc)
+
+"""Test BOARD"""
+
+
+class BoardCase(TestCase):
+    """Test that all routes on nodes with routes on partner nodes."""
+    def setUp(self):
+
+        self.board = BOARD
+
+    def test_routes(self):
+        for index in range(1, 200):
+            for key in self.board[index]:
+                for item in self.board[index][key]:
+                    print(index)
+                    print(key)
+                    print(self.board[index][key])
+                    print(item)
+                    print(self.board[item][key])
+                    self.assertIn(index, self.board[item][key])

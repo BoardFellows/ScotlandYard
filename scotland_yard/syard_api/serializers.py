@@ -34,7 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
         user.set_password(validated_data['password'])
         user.save()
-        UserProfile.objects.create(user=user)
+        # UserProfile.objects.create(user=user)
         return user
 
 
