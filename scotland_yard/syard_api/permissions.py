@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from rest_framework.authtoken.models import Token
 
     
 class IsCreateOrIsOwner(permissions.BasePermission):
@@ -9,7 +10,5 @@ class IsCreateOrIsOwner(permissions.BasePermission):
         if request.method == "POST":
             return True
 
-        # token = Token.objects.get(token=request['Authentication'][7:])
-        # user = token.user
-        # return obj == user
-        return obj.user == request.user
+        token = Token.objects.get(user=obj.user)
+        return token == request['Authentication'][7:]

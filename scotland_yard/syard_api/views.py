@@ -5,6 +5,7 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login
 from rest_framework import (
     viewsets,
+    generics,
     permissions
 )
 from rest_framework.authentication import TokenAuthentication
@@ -30,9 +31,20 @@ def board_view(request):
     """Return the Board with a get request."""
     data = {'board': {'a': 'b'}}
     return JsonResponse(data)
+mixins.CreateModelMixin, 
+                   mixins.RetrieveModelMixin, 
+                   mixins.UpdateModelMixin,
+                   mixins.DestroyModelMixin,
+                   mixins.ListModelMixin,
+                   GenericViewSet
 
-
-class UserViewSet(viewsets.ModelViewSet):
+# class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    GenericViewSet
+)
     """Provides actions for user view."""
 
     queryset = User.objects.all()
