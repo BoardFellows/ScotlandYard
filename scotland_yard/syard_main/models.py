@@ -37,8 +37,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         related_name="profile",
-        null=True,
-        blank=True,
+        null=True
     )
     friends = models.ManyToManyField(
         "self",
@@ -132,6 +131,8 @@ class Game(models.Model):
         starts = list(STARTING_NODES)
         output = [starts.pop(randrange(0, len(starts))) for x in range(6)]
         return output
+
+    # current player
 
 
 @python_2_unicode_compatible
