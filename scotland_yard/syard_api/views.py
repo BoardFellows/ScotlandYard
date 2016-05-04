@@ -2,12 +2,14 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate, login
 from rest_framework import (
     viewsets,
     permissions
 )
-# from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth.models import User
+from syard_api.permissions import IsCreateOrIsOwner
 # from django.shortcuts import get_object_or_404
 from syard_main.models import (
     # UserProfile,
@@ -40,11 +42,11 @@ class UserViewSet(viewsets.ModelViewSet):
         response = super(UserViewSet, self).create(request, data=request.data)
         user = User.objects.get(id=response.data['id'])
         token = Token.objects.get(user=user)
-        response['auth-token'] = token
+        response['authToken'] = token
         return response
 
-    # authentication_classes = (TokenAuthentication,)
-    # permission_classes = (permissions.IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsCreateOrIsOwner,)
 
 
 class GameViewSet(viewsets.ModelViewSet):

@@ -17,15 +17,6 @@ class ProfileSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     """Serialization of Users."""
 
-    # token = serializers.SerializerMethodField()
-
-    # def get_token(self, validated_data):
-    #     """Retrive User Token."""
-    #     user = User.objects.get(username=validated_data.username)
-    #     user = self.context['request'].user
-    #     token = Token.objects.get(user=user)
-    #     return token.key
-
     class Meta:
         """Meta."""
 
@@ -33,7 +24,6 @@ class UserSerializer(serializers.ModelSerializer):
         depth = 1
         fields = (
             'id', 'username', 'email', 'password', 'profile',
-            # 'token'
         )
 
     def create(self, validated_data):
