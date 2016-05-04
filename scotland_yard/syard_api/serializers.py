@@ -18,7 +18,6 @@ class ProfileSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     """Serialization of Users."""
 
-    profile = ProfileSerializer()
 
     class Meta:
         """Meta."""
@@ -39,16 +38,6 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class GameSerializer(serializers.ModelSerializer):
-    """Serialization of games."""
-
-    class Meta:
-        """Meta."""
-
-        model = Game
-        fields = ('url', 'id', 'rounds', 'host', 'date_created', 'date_modified', 'complete', 'winner')
-
-
 class RoundSerializer(serializers.ModelSerializer):
     """Serialization of rounds."""
 
@@ -57,9 +46,23 @@ class RoundSerializer(serializers.ModelSerializer):
 
         model = Round
         fields = (
-            'game', 'mrx_loc', 'red_loc', 'yellow_loc',
-            'green_loc', 'blue_loc', 'purple_loc', 'complete'
+            'mrx_loc', 'det1_loc', 'det2_loc',
+            'det3_loc', 'det4_loc', 'det5_loc', 'complete'
         )
+
+class GameSerializer(serializers.ModelSerializer):
+    """Serialization of games."""
+
+
+    class Meta:
+        """Meta."""
+
+        model = Game
+        depth = 1
+        fields = ('url', 'id', 'rounds', 'host', 'date_created', 'date_modified', 'complete', 'winner')
+
+
+
 
 # class BoardSerializer(serializer.ModelSerializer)
 # just returns the board or errors

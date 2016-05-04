@@ -28,23 +28,8 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
 
-class ProfileViewSet(viewsets.ModelViewSet):
-    """Provides actions for profile view."""
-
-    queryset = UserProfile.objects.all()
-    serializer_class = ProfileSerializer
-
-
 class GameViewSet(viewsets.ModelViewSet):
     """Provides actions for user view."""
 
     queryset = Game.objects.all()
     serializer_class = GameSerializer
-
-
-
-class RoundViewSet(viewsets.ModelViewSet):
-    """Provides actions for user view."""
-
-    queryset = Round.objects.all()
-    serializer_class = RoundSerializer
