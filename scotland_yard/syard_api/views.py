@@ -29,14 +29,14 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
 
 class GameViewSet(viewsets.ModelViewSet):
-    """Provides list and detail actions for user view."""
+    """Provides actions for user view."""
 
     queryset = Game.objects.all()
     serializer_class = GameSerializer
 
 
 class RoundViewSet(viewsets.ModelViewSet):
-    """Provides list and detail actions for user view."""
+    """Provides actions for user view."""
 
     queryset = Round.objects.all()
     serializer_class = RoundSerializer

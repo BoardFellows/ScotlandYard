@@ -3,9 +3,7 @@ from __future__ import unicode_literals
 from random import randrange
 
 from django.conf import settings
-
 from django.db import models
-
 from django.utils.encoding import python_2_unicode_compatible
 
 
@@ -38,7 +36,9 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
-        related_name="profile"
+        related_name="profile",
+        null=True,
+        blank=True,
     )
     friends = models.ManyToManyField(
         "self",
@@ -98,22 +98,6 @@ class Game(models.Model):
     )
 
     player1_is_x = models.BooleanField(default=True)
-
-    # @property
-    # def player_1(self):
-    #     try:
-    #         p1 = self.players.all()[0]
-    #         return p1
-    #     except(IndexError, KeyError):
-    #         return "player 1 unset"
-
-    # @property
-    # def player_2(self):
-    #     try:
-    #         p2 = self.players.all()[1]
-    #         return p2
-    #     except(IndexError, KeyError):
-    #         return "player 2 unset"
 
     def __str__(self):
         """Return string output of username."""
