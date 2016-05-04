@@ -59,7 +59,7 @@ class GameSerializer(serializers.ModelSerializer):
             'id', 'rounds', 'host', 'date_created',
             'date_modified', 'player_1', 'player_2',
             # 'current_player',
-            'turn_number',
+            'round_number',
             'complete', 'winner'
         )
 
