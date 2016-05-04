@@ -1,32 +1,35 @@
 # from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
 from rest_framework import viewsets
 from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
+from syard_main.models import UserProfile, Game, Round
 from syard_api.serializers import (
     UserSerializer,
-    # GameSerializer,
-    # PlayerSerializer,
+    ProfileSerializer,
+    GameSerializer,
+    RoundSerializer,
     # BoardSerializer,
-    # NodeSerializer,
-    # EdgeSerializer,
 )
 
 
+@require_GET
+def board_view(request):
+    """Return the Board with a get request."""
+    data = {'board': {'a': 'b'}}
+    return JsonResponse(data)
+
+
 class UserViewSet(viewsets.ModelViewSet):
-    """Provides list and detail actions for user view."""
+    """Provides actions for user view."""
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
 class GameViewSet(viewsets.ModelViewSet):
-    """Provides list and detail actions for user view."""
+    """Provides actions for user view."""
 
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class BoardViewSet(viewsets.ModelViewSet):
-    """Provides list and detail actions for user view."""
-
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+    queryset = Game.objects.all()
+    serializer_class = GameSerializer
