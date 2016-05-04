@@ -10,23 +10,21 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         """Meta."""
 
         model = User
-        fields = ('url', 'id', 'username', 'email', 'profile')
+        fields = ('url', 'id', 'username', 'email', 'password')
+
+    def create(self, validated_data):
+        """Modified create method to encrypt password to save in db."""
+        user = User(
+            email=validated_data['email'],
+            username=validated_data['username']
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
 
 
 class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     """Serialization of Profiles."""
-
-    def get_user(self, obj):
-        """Get User."""
-        return User.objects.get(user=obj.user)
-
-    def get_friends(self, obj):
-        """Get Friends."""
-        return User.objects.filter(friend_of=obj.user)
-
-    def get_games(self, obj):
-        """Get Games."""
-        return Game.objects.filter(user=obj.player)
 
     class Meta:
         """Meta."""
@@ -37,34 +35,25 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
 
 class GameSerializer(serializers.HyperlinkedModelSerializer):
     """Serialization of games."""
-    
-    # def get_players(self, obj):
-    #     return User.objects.filter(user=obj.players.user)
-
-    def get_winner(self, obj):
-        return User.objects.filter(username=obj.winner.username)
-
-    def get_round(self, obj):
-        return Round.objects.filter(id=obj.id)
 
     class Meta:
         """Meta."""
 
         model = Game
-        fields = ('url', 'id', 'host', 'round', 'date_created', 'date_modified', 'complete', 'winner')
+        fields = ('url', 'id', 'rounds', 'host', 'date_created', 'date_modified', 'complete', 'winner')
 
 
 class RoundSerializer(serializers.HyperlinkedModelSerializer):
-
-    def get_game(self, obj):
-        return Game.objects.get(game=obj.game)
+    """Serialization of rounds."""
 
     class Meta:
         """Meta."""
 
         model = Round
-        fields = ('game', 'mrx_loc', 'red_loc', 'yellow_loc',
-            'green_loc', 'blue_loc', 'purple_loc', 'complete')
+        fields = (
+            'game', 'mrx_loc', 'red_loc', 'yellow_loc',
+            'green_loc', 'blue_loc', 'purple_loc', 'complete'
+        )
 
 # class PlayerSerializer(serializers.HyperlinkedModelSerializer):
 #     """Serialization of Player."""

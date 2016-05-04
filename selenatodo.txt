@@ -1,0 +1,6 @@
+cors
+Check Token authentication
+password?
+require own to view password on user
+require token header to view anything
+game must be owned
