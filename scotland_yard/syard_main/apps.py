@@ -10,6 +10,3 @@ class SyardMainConfig(AppConfig):
 
         """code to run when app is ready."""
         from syard_main import handlers
-
-        """Import signals on ready."""
-        from syard_main import signals

@@ -1,22 +1,11 @@
 from rest_framework import permissions
-from rest_framework.authtoken.models import Token
-
-from syard_api.helper import (
-    get_auth_header,
-    get_credentials,
-    check_credentials,
-)
+from syard_api.helper import get_auth_user
 
 
 def check_for_auth(request, obj):
     """Method to check for token or basic auth."""
     try:
-        auth_header = get_auth_header(request)
-        if auth_header[0] == "Token":
-            auth_token = Token.objects.get(user=obj)
-            return auth_token == auth_header[1]
-        auth_user = check_credentials(get_credentials(auth_header))
-        return auth_user == obj
+        return obj == get_auth_user(request)
     except KeyError:
         return False
 

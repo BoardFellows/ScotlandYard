@@ -9,12 +9,11 @@ from rest_framework import HTTP_HEADER_ENCODING, exceptions
 from rest_framework.authtoken.models import Token
 
 
-def get_auth_user(request):
+def get_auth_user(request, token_only=False):
     auth_header = get_auth_header(request)
-    print(auth_header)
     if auth_header[0] == b'Token':
         return get_token_auth_user(auth_header)
-    elif auth_header[0] == b'Basic':
+    elif auth_header[0] == b'Basic' and not token_only:
         return get_basic_auth_user(auth_header)
 
 
