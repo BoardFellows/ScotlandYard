@@ -2,20 +2,21 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_GET
 
-from rest_framework import (viewsets, status)
-from rest_framework.authentication import TokenAuthentication
+from rest_framework import viewsets, status
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
 from syard_api.permissions import (
     IsCreateOrIsAuthorized,
-    HasToken,
+    HasTokenOrBasic,
+)
+from syard_api.helper import (
     check_credentials,
     get_credentials,
     get_auth_header,
 )
-from syard_api.serializers import (UserSerializer, GameSerializer,)
-from syard_main.models import (Game,)
+from syard_api.serializers import UserSerializer, GameSerializer
+from syard_main.models import Game
 from syard_main.board import BOARD
 
 
@@ -45,7 +46,7 @@ class UserViewSet(viewsets.ModelViewSet):
         try:
             user = check_credentials(get_credentials(get_auth_header(request)))
         except KeyError:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+            user = get_auth_user(request)
         serializer = self.get_serializer(user)
         response = Response(serializer.data)
         response['authToken'] = Token.objects.get(user=user)
@@ -57,8 +58,7 @@ class GameViewSet(viewsets.ModelViewSet):
 
     queryset = Game.objects.all()
     serializer_class = GameSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (HasToken, IsCreateOrIsAuthorized)
+    permission_classes = (HasTokenOrBasic,)
 
     def get_queryset(self):
         """Get all games belonging to user whose Auth Token was sent in headers."""

@@ -11,8 +11,12 @@ from rest_framework.authtoken.models import Token
 
 
 def get_auth_user(request):
-    auth_header = get_auth_header(request)
-    return Token.objects.get(key=auth_header[1]).user
+    try:
+        auth_header = get_auth_header(request)
+        return Token.objects.get(key=auth_header[1]).user
+    except KeyError:
+        msg = _('No Auth headers present.')
+        raise exceptions.AuthenticationFailed(msg)
 
 
 def get_auth_header(request):
@@ -21,6 +25,7 @@ def get_auth_header(request):
     if isinstance(auth, text_type):
         auth = auth.encode(HTTP_HEADER_ENCODING)
     return auth.split()
+
 
 
 def get_credentials(auth):
@@ -50,4 +55,4 @@ def check_credentials(credentials):
     user = authenticate(**credentials)
     if user is None:
         raise exceptions.AuthenticationFailed(_('Invalid username or password.'))
-    return User.objects.get(username=credentials['username'])
+    return user

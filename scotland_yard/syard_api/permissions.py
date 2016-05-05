@@ -9,6 +9,7 @@ from syard_api.helper import (
 
 
 def check_for_auth(request, obj):
+    """Method to check for token or basic auth."""
     try:
         auth_header = get_auth_header(request)
         if auth_header[0] == "Token":
