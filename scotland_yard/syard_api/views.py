@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_GET
 
@@ -11,6 +11,11 @@ from syard_api.helper import get_auth_user
 from syard_api.serializers import UserSerializer, GameSerializer
 from syard_main.models import Game
 from syard_main.board import BOARD
+
+
+def home_view(request, *args, **kwargs):
+    welcome = "Welcome GameFellows!"
+    return HttpResponse(welcome)
 
 
 @require_GET
