@@ -48,8 +48,7 @@ class GameSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'rounds', 'host', 'date_created',
             'date_modified', 'player_1', 'player_2',
-            # 'current_player',
-            'round_number',
+            'active_player', 'round_number', 'current_round'
             'complete', 'winner'
         )
 
@@ -60,9 +59,16 @@ class GameSerializer(serializers.ModelSerializer):
         host = token.user.profile
         game = Game(
             host=host,
-            player_1=host
+            player_1=host,
+            player_1_is_x=self.context['request']
         )
         game.save()
+        return game
+
+    def update(self, validated_data):
+        current
+        
+
         return game
 
 
@@ -77,8 +83,3 @@ class RoundSerializer(serializers.ModelSerializer):
             'mrx_loc', 'det1_loc', 'det2_loc',
             'det3_loc', 'det4_loc', 'det5_loc', 'complete'
         )
-
-
-# class BoardSerializer(serializer.ModelSerializer)
-# just returns the board or errors
-# pass

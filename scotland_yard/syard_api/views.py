@@ -1,9 +1,8 @@
 from django.http import JsonResponse
 from django.contrib.auth.models import User
-from django.shortcuts import redirect
 from django.views.decorators.http import require_GET
 
-from rest_framework import (viewsets,)
+from rest_framework import (viewsets, status)
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -45,7 +44,10 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         """Repurpose list method for authenticating user credentials and redirecting/providing authToken."""
-        user = check_credentials(get_credentials(get_auth_header(request)))
+        try:
+            user = check_credentials(get_credentials(get_auth_header(request)))
+        except KeyError:
+            return Response(status= status.HTTP_401_UNAUTHORIZED)
         serializer = self.get_serializer(user)
         response = Response(serializer.data)
         response['authToken'] = Token.objects.get(user=user)
@@ -58,17 +60,12 @@ class GameViewSet(viewsets.ModelViewSet):
     queryset = Game.objects.all()
     serializer_class = GameSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (HasToken, )
+    permission_classes = (HasToken, IsCreateOrIsAuthorized)
 
     def get_queryset(self):
         """Get all games belonging to user whose Auth Token was sent in headers."""
         try:
-            # token = self.request.META['HTTP_AUTHORIZATION'].split()[1]
-            # usertoken = Token.objects.get(key=token)
-            # header = get_auth_header(self.request)
             token = Token.objects.get(key=get_auth_header(self.request)[1])
-            # user = usertoken.user
         except KeyError:
             return
-        # return Game.objects.filter(host=user.profile)
         return Game.objects.filter(host=token.user.profile)
