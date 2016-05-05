@@ -3,9 +3,10 @@ from django.contrib.auth.models import User
 from django.shortcuts import redirect
 from django.views.decorators.http import require_GET
 
-from rest_framework.authtoken.models import Token
 from rest_framework import (viewsets,)
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
 
 from syard_api.permissions import (
     IsCreateOrIsAuthorized,
@@ -45,18 +46,9 @@ class UserViewSet(viewsets.ModelViewSet):
     def list(self, request):
         """Repurpose list method for authenticating user credentials and redirecting/providing authToken."""
         user = check_credentials(get_credentials(get_auth_header(request)))
-        url = '/users/{}'.format(user.id)
-        response = redirect(url)
-        print(user.id)
-        print(user)
-        token = Token.objects.get(user=user)
-        print(token)
-        print(token.user)
-        print(token.user==user)
-        response['authToken'] = token
-        print(dir(response))
-        print(response)
-        print(response['authToken'])
+        serializer = self.get_serializer(user)
+        response = Response(serializer.data)
+        response['authToken'] = Token.objects.get(user=user)
         return response
 
 
