@@ -7,7 +7,7 @@ import factory
 
 from syard_main.board import BOARD
 
-from syard_main.models import Detective, Game, MrX, Round, UserProfile
+from syard_main.models import Detective, Game, MrX, Round, STARTING_NODES, UserProfile
 
 """Test UserProfile model."""
 
@@ -200,8 +200,8 @@ class GameCase(TestCase):
     def test_round_exists(self):
         self.assertTrue(self.game_1.rounds)
 
-    def test_turn_number(self):
-        self.assertTrue(self.game_1.turn_number(), 1)
+    def test_round_number(self):
+        self.assertEquals(self.game_1.round_number, 0)
 
     def test_locations(self):
         self.assertTrue(self.game_1.rounds.first().mrx_loc)
@@ -210,6 +210,68 @@ class GameCase(TestCase):
         self.assertTrue(self.game_1.rounds.first().det3_loc)
         self.assertTrue(self.game_1.rounds.first().det4_loc)
         self.assertTrue(self.game_1.rounds.first().det5_loc)
+
+    def test_valid_locations(self):
+        self.assertIn(self.game_1.rounds.first().mrx_loc, STARTING_NODES)
+        self.assertNotEqual(self.game_1.rounds.first().mrx_loc,
+                            self.game_1.rounds.first().det2_loc)
+
+    def test_get_locations(self):
+        locations = self.game_1.get_locations()
+        for key, value in locations.items():
+            self.assertIn(value, STARTING_NODES)
+
+"""TEST MODEL METHODS"""
+
+
+class MethodsCase(TestCase):
+    """Test methods on game and round that check and modify game state."""
+    def setUp(self):
+
+        self.user_1 = UserFactory.create(
+            username='jim',
+            email='jim@example.com',
+        )
+        self.user_1.set_password('secret')
+
+        self.user_2 = UserFactory.create(
+            username='judy',
+            email='judy@example.com',
+        )
+        self.user_2.set_password('moresecret')
+
+        self.game_1 = GameFactory.create(
+            host=self.user_1.profile,
+        )
+
+        self.user_1.profile.player_1.add(self.game_1)
+        self.user_2.profile.player_2.add(self.game_1)
+        self.game_1.users.add(self.game_1.player_1)
+        self.game_1.users.add(self.game_1.player_2)
+
+        def test_round_complete(self):
+            """Test that setup round is complete."""
+            self.assertTrue(self.game_1.rounds.latest().complete)
+
+        def test_new_round(self):
+            """Add new round, test counts."""
+            next_piece = self.game_1.make_new_round()
+            self.assertEqual(next_piece, 'mrx')
+            self.assertEqual(self.game_1.round_number, 1)
+            self.assertEqual(self.game_1.rounds.count(), 2)
+
+        def test_current_player(self):
+            """Add new round, test player, update round, test player again."""
+            next_piece = self.game_1.make_new_round()
+            self.assertEqual(next_piece, 'mrx')
+            self.assertIs(self.game_1.active_player, self.user_1)
+            self.assertIsNot(self.game_1.active_player, self.user_2)
+            r = self.game_1.rounds.latest()
+            r.mrx_loc = 75
+            self.assertEqual(r.active_piece, 'det1')
+            self.assertIs(self.game_1.active_player, self.user_2)
+            self.assertIsNot(self.game_1.active_player, self.user_1)
+
 
 """Test BOARD"""
 
