@@ -52,9 +52,9 @@ class GameSerializer(serializers.ModelSerializer):
         model = Game
         depth = 1
         fields = (
-            'id', 'rounds', 'host', 'date_created',
+            'id', 'host', 'date_created',
             'date_modified', 'player_1', 'player_2',
-            'active_player', 'round_number', 'current_round'
+            'active_player', 'round_number', 'current_round', 'rounds',
             'complete', 'winner'
         )
 

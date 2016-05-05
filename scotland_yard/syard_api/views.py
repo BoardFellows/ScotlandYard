@@ -47,7 +47,7 @@ class UserViewSet(viewsets.ModelViewSet):
         try:
             user = check_credentials(get_credentials(get_auth_header(request)))
         except KeyError:
-            return Response(status= status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer = self.get_serializer(user)
         response = Response(serializer.data)
         response['authToken'] = Token.objects.get(user=user)
