@@ -1,19 +1,23 @@
 from django.http import JsonResponse
-from django.views.decorators.http import require_GET
-from rest_framework.authtoken.models import Token
-from rest_framework import (viewsets, status,)
-from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth.models import User
-from syard_api.permissions import IsCreateOrIsOwner, HasToken
+from django.shortcuts import redirect
+from django.views.decorators.http import require_GET
+
+from rest_framework import (viewsets,)
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
+
+from syard_api.permissions import (
+    IsCreateOrIsAuthorized,
+    HasToken,
+    check_credentials,
+    get_credentials,
+    get_auth_header,
+)
 from syard_api.serializers import (UserSerializer, GameSerializer,)
 from syard_main.models import (Game,)
 from syard_main.board import BOARD
-
-
-def get_request_token(request):
-    token = request.META['HTTP_AUTHENTICATION']
-    return Token.objects.get(key="Token {}".format(token))
 
 
 @require_GET
@@ -28,8 +32,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsCreateOrIsOwner,)
+    # authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsCreateOrIsAuthorized,)
 
     def create(self, request):
         """Create User and Send token in as header."""
@@ -40,8 +44,12 @@ class UserViewSet(viewsets.ModelViewSet):
         return response
 
     def list(self, request):
-        """Disallow list method."""
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        """Repurpose list method for authenticating user credentials and redirecting/providing authToken."""
+        user = check_credentials(get_credentials(get_auth_header(request)))
+        serializer = self.get_serializer(user)
+        response = Response(serializer.data)
+        response['authToken'] = Token.objects.get(user=user)
+        return response
 
 
 class GameViewSet(viewsets.ModelViewSet):
@@ -55,9 +63,12 @@ class GameViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Get all games belonging to user whose Auth Token was sent in headers."""
         try:
-            token = self.request.META['HTTP_AUTHORIZATION'].split()[1]
-            usertoken = Token.objects.get(key=token)
-            user = usertoken.user
+            # token = self.request.META['HTTP_AUTHORIZATION'].split()[1]
+            # usertoken = Token.objects.get(key=token)
+            # header = get_auth_header(self.request)
+            token = Token.objects.get(key=get_auth_header(self.request)[1])
+            # user = usertoken.user
         except KeyError:
             return
-        return Game.objects.filter(host=user.profile)
+        # return Game.objects.filter(host=user.profile)
+        return Game.objects.filter(host=token.user.profile)
