@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_GET
 
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
@@ -10,11 +10,7 @@ from syard_api.permissions import (
     IsCreateOrIsAuthorized,
     HasTokenOrBasic,
 )
-from syard_api.helper import (
-    check_credentials,
-    get_credentials,
-    get_auth_header,
-)
+from syard_api.helper import get_auth_user
 from syard_api.serializers import UserSerializer, GameSerializer
 from syard_main.models import Game
 from syard_main.board import BOARD
@@ -43,10 +39,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         """Repurpose list method for authenticating user credentials and redirecting/providing authToken."""
-        try:
-            user = check_credentials(get_credentials(get_auth_header(request)))
-        except KeyError:
-            user = get_auth_user(request)
+        user = get_auth_user(request)
         serializer = self.get_serializer(user)
         response = Response(serializer.data)
         response['authToken'] = Token.objects.get(user=user)
@@ -62,8 +55,4 @@ class GameViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Get all games belonging to user whose Auth Token was sent in headers."""
-        try:
-            token = Token.objects.get(key=get_auth_header(self.request)[1])
-        except KeyError:
-            return
-        return Game.objects.filter(host=token.user.profile)
+        return get_auth_user(self.request).profile.games

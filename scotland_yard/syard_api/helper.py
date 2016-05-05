@@ -4,28 +4,37 @@ import binascii
 from django.utils.six import text_type
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
 
 from rest_framework import HTTP_HEADER_ENCODING, exceptions
 from rest_framework.authtoken.models import Token
 
 
 def get_auth_user(request):
-    try:
-        auth_header = get_auth_header(request)
-        return Token.objects.get(key=auth_header[1]).user
-    except KeyError:
-        msg = _('No Auth headers present.')
-        raise exceptions.AuthenticationFailed(msg)
+    auth_header = get_auth_header(request)
+    print(auth_header)
+    if auth_header[0] == b'Token':
+        return get_token_auth_user(auth_header)
+    elif auth_header[0] == b'Basic':
+        return get_basic_auth_user(auth_header)
+
+
+def get_token_auth_user(auth_header):
+    return Token.objects.get(key=auth_header[1]).user
+
+
+def get_basic_auth_user(auth_header):
+    return check_credentials(get_credentials(auth_header))
 
 
 def get_auth_header(request):
     """Get auth header and return as list split on white space."""
-    auth = request.META['HTTP_AUTHORIZATION']
-    if isinstance(auth, text_type):
-        auth = auth.encode(HTTP_HEADER_ENCODING)
-    return auth.split()
-
+    try:
+        auth = request.META['HTTP_AUTHORIZATION']
+        if isinstance(auth, text_type):
+            auth = auth.encode(HTTP_HEADER_ENCODING)
+        return auth.split()
+    except KeyError:
+        raise exceptions.AuthenticationFailed('No Authorization')
 
 
 def get_credentials(auth):
@@ -38,14 +47,14 @@ def get_credentials(auth):
         raise exceptions.AuthenticationFailed(msg)
 
     try:
-        auth_parts = base64.b64decode(auth[1]).decode(HTTP_HEADER_ENCODING).partition(':')
+        auth_credentials = base64.b64decode(auth[1]).decode(HTTP_HEADER_ENCODING).partition(':')
     except (TypeError, UnicodeDecodeError, binascii.Error):
         msg = _('Invalid basic header. Credentials not correctly base64 encoded.')
         raise exceptions.AuthenticationFailed(msg)
 
     credentials = {
-        'username': auth_parts[0],
-        'password': auth_parts[2]
+        'username': auth_credentials[0],
+        'password': auth_credentials[2]
     }
     return credentials
 
