@@ -76,16 +76,3 @@ class GameSerializer(serializers.ModelSerializer):
         ticket = validated_data['tokenType']
         instance.move_piece(cur_node, next_node, ticket, player_profile)
         return instance
-
-
-class RoundSerializer(serializers.ModelSerializer):
-    """Serialization of rounds."""
-
-    class Meta:
-        """Meta."""
-
-        model = Round
-        fields = (
-            'mrx_loc', 'det1_loc', 'det2_loc',
-            'det3_loc', 'det4_loc', 'det5_loc', 'complete'
-        )
