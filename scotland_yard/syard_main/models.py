@@ -182,8 +182,9 @@ class Game(models.Model):
         self.users.add(self.player_1)
         self.users.add(self.player_2)
 
-    def move_piece(self, id1, id2, ticket):
-        if self.validate_move(self, id1, id2, ticket) is True:
+    def move_piece(self, id1, id2, ticket, user_profile):
+        self.current_round
+        if self.validate_move(self, id1, id2, ticket, user_profile) is True:
             if self.active_piece == 'mrx':
                 self.current_round.mrx_loc = id2
                 self._move_helper(self, self.mrx, ticket)
@@ -196,26 +197,38 @@ class Game(models.Model):
     def _move_helper(self, piece, ticket):
         target = piece.__getattribute__(ticket)
         target -= 1
+
     """MAIN MOVE VALIDATOR"""
 
-    def validate_move(self, id1, id2, ticket):
+    def validate_move(self, id1, id2, ticket, user_profile):
         """Return True if move is validated."""
         #  TODO: Figure out how to catch error messages as they bubble up.
+        occupied = self.get_locations()
+        if self._wrong_player(self, user_profile):
+            return "NOTYA TURN"
         try:
-            self._wrong_piece(self, id1)
+            self._wrong_piece(id1)
         except ValueError:
             return "YA DONE GOOFED"
         try:
-            self._invalid_move(self, id1, id2)
+            self._invalid_move(id1, id2)
         except KeyError:
             return "YA DONE GOOFED."
-        if not self._legal_move:
+        if not self._legal_move(id1, id2, ticket):
             return "YA DONE GOOFED."
-        if not self._has_ticket:
+        if not self._has_ticket(ticket):
             return "YA BROKE, SON."
+        if self._check_capture(self, id2, occupied):
+            return self._check_capture(self, id2, occupied)
+        if self._space_occupied(self, id1, id2, occupied):
+            return self._space_occupied(self, id1, id2, occupied)
         return True
 
     """VALIDATION HELPER METHODS"""
+
+    def _wrong_player(self, user_profile):
+        if user_profile is not self.active_player:
+            return "wrong player"
 
     def _wrong_piece(self, id1):
         """Validate id1 against location of active piece."""
@@ -250,16 +263,26 @@ class Game(models.Model):
 
     def _has_ticket(self, ticket):
         """Check that the piece to be moved as an appropriate ticket"""
-        t = ticket
         if self.active_piece == 'mrx':
-            return True if self.mrx.__getattribute__(t) > 0 else False
+            return True if self.mrx.__getattribute__(ticket) > 0 else False
         else:
             d = self.dets.get(role=self.active_piece)
-            return True if d.__getattribute__(t) > 0 else False
+            return True if d.__getattribute__(ticket) > 0 else False
 
     def _real_move(self, id1, id2):
         """Check that a proposed move is actually a move"""
         return True if id1 != id2 else False
+
+    def _check_capture(self, id2, occupied):
+        """Check if a detective has moved on to mrx - if yes, return player"""
+        occupied = self.get_locations()
+        if id2 == occupied['mrx']:
+            return self.active_player
+
+    def _space_occupied(self, id1, id2, occupied):
+        for name, id in occupied:
+            if id2 == id:
+                return "location {} is occupied by {}".format(id, name)
 
 
 @python_2_unicode_compatible
