@@ -31,15 +31,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # authentication_classes = (TokenAuthentication,)
     permission_classes = (IsCreateOrIsAuthorized,)
 
     def create(self, request):
         """Create User and Send token in as header."""
         response = super(UserViewSet, self).create(request, data=request.data)
         user = User.objects.get(id=response.data['id'])
-        token = Token.objects.get(user=user)
-        response['authToken'] = token
+        response['authToken'] = Token.objects.get(user=user) 
         return response
 
     def list(self, request):

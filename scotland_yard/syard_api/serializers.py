@@ -10,14 +10,14 @@ def get_auth_user(request):
     return Token.objects.get(key=auth_header[1]).user
 
 
-class ProfileSerializer(serializers.ModelSerializer):
-    """Serialization of Profiles."""
+# class ProfileSerializer(serializers.ModelSerializer):
+#     """Serialization of Profiles."""
 
-    class Meta:
-        """Meta."""
+#     class Meta:
+#         """Meta."""
 
-        model = UserProfile
-        fields = ('friends', 'games')
+#         model = UserProfile
+#         fields = ('friends', 'games')
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -31,6 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'username', 'email', 'password', 'profile',
         )
+        # TODO: Check with F. What fields does he need?
 
     def create(self, validated_data):
         """Modified create method to encrypt password to save in db."""
@@ -61,7 +62,11 @@ class GameSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Modified create method to encrypt password to save in db."""
         player1 = get_auth_user(self.context['request']).profile
-        player2 = User.objects.get(email=validated_data['otherPlayer']).profile
+        print(validated_data['boo'])
+        try:
+            player2 = User.objects.get(email=validated_data['otherPlayer']).profile
+        except KeyError:
+            player2 = None
         game = Game(
             host=player1,
             player_1_is_x=validated_data['gameCreatorIsMrX']
