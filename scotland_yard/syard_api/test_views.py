@@ -1,7 +1,6 @@
 from syard_main.models import UserProfile, Game
 import factory
 from rest_framework.authtoken.models import Token
-# from django.core.urlresolvers import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient, APIRequestFactory
 from django.conf import settings
