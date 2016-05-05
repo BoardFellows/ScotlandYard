@@ -249,67 +249,91 @@ class MethodsCase(TestCase):
         self.game_1.users.add(self.game_1.player_1)
         self.game_1.users.add(self.game_1.player_2)
 
-        def test_round_complete(self):
-            """Test that setup round is complete."""
-            self.assertTrue(self.game_1.rounds.latest().complete)
+    def test_round_complete(self):
+        """Test that setup round is complete."""
+        self.assertTrue(self.game_1.rounds.latest('date_modified').complete)
 
-        def test_new_round(self):
-            """Add new round, test counts."""
-            next_piece = self.game_1.make_new_round()
-            self.assertEqual(next_piece, 'mrx')
-            self.assertEqual(self.game_1.round_number, 1)
-            self.assertEqual(self.game_1.rounds.count(), 2)
+    def test_new_round(self):
+        """Add new round, test counts."""
+        next_piece = self.game_1.make_new_round()
+        self.assertEqual(next_piece, 'mrx')
+        self.assertEqual(self.game_1.round_number, 1)
+        self.assertEqual(self.game_1.rounds.count(), 2)
 
-        def test_current_player(self):
-            """Add new round, test player, update round, test player again."""
-            next_piece = self.game_1.make_new_round()
-            self.assertEqual(next_piece, 'mrx')
-            self.assertIs(self.game_1.active_player, self.user_1)
-            self.assertIsNot(self.game_1.active_player, self.user_2)
-            r = self.game_1.rounds.latest()
-            r.mrx_loc = 75
-            self.assertEqual(r.active_piece, 'det1')
-            self.assertIs(self.game_1.active_player, self.user_2)
-            self.assertIsNot(self.game_1.active_player, self.user_1)
+    def test_current_player(self):
+        """Add new round, test player, update round, test player again."""
+        next_piece = self.game_1.make_new_round()
+        self.assertEqual(next_piece, 'mrx')
+        self.assertIs(self.game_1.active_player, self.user_1.profile)
+        self.assertIsNot(self.game_1.active_player, self.user_2.profile)
+        rnd = self.game_1.rounds.latest('date_modified')
+        rnd.mrx_loc = 75
+        rnd.save()
+        self.assertEqual(rnd.active_piece, 'det1')
+        self.assertIs(self.game_1.active_player, self.user_2.profile)
+        self.assertIsNot(self.game_1.active_player, self.user_1.profile)
 
-        def test_move_piece(self):
-            """Add new round, move mrx, add new round, make legal move with mrx."""
-            self.game_1.current_round.mrx_loc = 75
-            self.game_1.make_new_round()
-            self.game_1.move_piece(75, 94, 'taxi')
-            self.assertIs(94, self.current_round.mrx_loc)
+    def test_move_piece(self):
+        """Add new round, move mrx, add new round, make legal move with mrx."""
+        rnd = self.game_1.current_round
+        rnd.mrx_loc = 75
+        rnd.save()
+        new_round = Round(game=self.game_1, num=(self.game_1.round_number + 1))
+        new_round.save()
+        import pdb; pdb.set_trace()
+        self.game_1.move_piece(75, 94, 'taxi', self.user_1.profile)
+        self.assertIs(94, rnd.mrx_loc)
 
-        def test_move_det(self):
-            """Add new round, move mrx & det1, add new round, make legal move with mrx & det1, test that det1 moved and ticket was subtracted."""
-            self.game_1.current_round.mrx_loc = 75
-            piece = self.game_1.current_piece
-            d = self.game_1.dets.get(role=piece)
-            target = self.game_1.current_round.__getattribute__(piece)
-            target = 1
-            self.game_1.make_new_round()
-            self.game_1.move_piece(75, 94, 'taxi')
-            self.game_1.move_piece(1, 8, 'taxi')
-            target = self.game_1.current_round.__getattribute__(piece)
-            self.assertIs(8, target)
-            self.assertEquals(d.taxi, 9)
+    def test_move_det(self):
+        """Add new round, move mrx & det1, add new round, make legal move with mrx & det1, test that det1 moved and ticket was subtracted."""
+        current = self.game_1.current_round
+        current.mrx_loc = 75
+        piece = self.game_1.active_piece
+        d = self.game_1.dets.get(role=piece)
+        rnd = self.game_1.current_round
+        target = rnd.__getattribute__(piece)
+        target = 1
+        new_round = Round(game=self.game_1, num=(self.game_1.round_number + 1))
+        new_round.save()
+        self.game_1.move_piece(75, 94, 'taxi', self.user_1.profile)
+        self.game_1.move_piece(1, 8, 'taxi', self.user_2.profile)
+        rnd = self.game_1.current_round
+        target = rnd.__getattribute__(piece)
+        self.assertIs(8, target)
+        self.assertEquals(d.taxi, 9)
 
-        def test_move_not_on_board(self):
-            """Checking move validator"""
-            self.game_1.current_round.mrx_loc = 75
-            self.game_1.make_new_round()
-            #  tests that a move to an unconnected node fails
-            self.game_1.move_piece(75, 1, 'taxi')
-            self.assertIsNot(1, self.current_round.mrx_loc)
-            self.game_1.move_piece(75, 94, 'underground')
-            #  tests that a move to a node unconnected by a specific type fails
-            self.assertIsNot(94, self.current_round.mrx_loc)
-            self.game_1.move_piece(75, 300, 'taxi')
-            #  tests that a move off the board fails
-            self.assertIsNot(300, self.current_round.mrx_loc)
-            self.game_1.mrx.taxi = 0
-            self.game_1.move_piece(75, 94, 'taxi')
-            #  tests that a valid move without a matching ticket fails
-            self.assertIsNot(94, self.current_round.mrx_loc)
+    def test_move_validation(self):
+        """Checking move validator"""
+        current_round = self.game_1.current_round
+        current_round.mrx_loc = 75
+        current_round.save()
+        self.game_1.make_new_round()
+        #  tests that a move to an unconnected node fails
+        self.game_1.move_piece(75, 1, 'taxi', self.user_1.profile)
+        self.assertIsNot(1, current_round.mrx_loc)
+        self.game_1.move_piece(75, 94, 'underground', self.user_1.profile)
+        #  tests that a move to a node unconnected by a specific type fails
+        self.assertIsNot(94, current_round.mrx_loc)
+        self.game_1.move_piece(75, 300, 'taxi', self.user_1.profile)
+        #  tests that a move off the board fails
+        self.assertIsNot(300, current_round.mrx_loc)
+        self.game_1.mrx.taxi = 0
+        self.game_1.move_piece(75, 94, 'taxi', self.user_1.profile)
+        #  tests that a valid move without a matching ticket fails
+        self.assertIsNot(94, current_round.mrx_loc)
+
+    def test__wrong_player(self):
+
+        rnd = self.game_1.current_round
+        rnd.mrx_loc = 75
+        self.game_1.make_new_round()
+        player = self.game_1.active_player
+        wrong_player = self.game_1.player_2 if player == self.game_1.player_1 else self.game_1.player_1
+        self.game_1.move_piece(75, 94, 'taxi', wrong_player)
+        self.assertIsNot(94, rnd.mrx_loc)
+        self.assertIs(75, rnd.mrx_loc)
+
+
 
 """Test BOARD"""
 

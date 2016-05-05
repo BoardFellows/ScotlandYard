@@ -137,25 +137,38 @@ class Game(models.Model):
 
     @property
     def current_round(self):
-        "Check if new round needed and return current round"
-        if self.rounds.latest.complete():
+        if self.rounds.latest('date_modified').complete:
             self.make_new_round()
-        return self.rounds.latest()
+        return self.rounds.latest('date_modified')
+
+    # @current_round.setter
+    # def current_round(self, current_round):
+    #     """Check if new round needed and return current round"""
+    #     if self.rounds.latest('date_modified').complete:
+    #         self.make_new_round()
+    #     self._current_round = self.rounds.latest('date_modified')
+
+    # @property
+    # def current_round1(self):
+    #     "Check if new round needed and return current round"
+    #     if self.rounds.latest('date_modified').complete:
+    #         self.make_new_round()
+    #     return self.rounds.latest('date_modified')
 
     @property
     def active_piece(self):
         """Return the piece to move next"""
-        current_round = self.rounds.latest()
+        current_round = self.rounds.latest('date_modified')
         return current_round.active_piece
 
     @property
     def active_player(self):
-        return self._active_player
+        return self._active_player()
 
     def _active_player(self):
         if (
-            (self.active_piece == 'mrx' and self.player_1_is_x) or
-            (self.active_piece != 'mrx' and not self.player_1_is_x)
+            ((self.active_piece == 'mrx') and self.player1_is_x) or
+            ((self.active_piece != 'mrx') and not self.player1_is_x)
         ):
             return self.player_1
         else:
@@ -163,17 +176,19 @@ class Game(models.Model):
 
     def _x_wins_by_turns(self):
         """Check for Game Over by number of turns, to be used below."""
-        if self.rounds.latest().complete and self.round_number == 22:
+        if self.rounds.latest('date_modified').complete and self.round_number == 22:
             return True
 
     def make_new_round(self):
         """Add a new round if round complete and new round needed."""
         if self._x_wins_by_turns():
             return 'X Wins.'
-        current_round = self.rounds.latest()
-        if current_round.complete():
-            new_round = Round(game=self.game, num=(self.round_number + 1))
-        return new_round.active_piece
+        current_round = self.rounds.latest('date_modified')
+        if current_round.complete:
+            new_round = Round(game=self, num=(self.round_number + 1))
+            new_round.save()
+            return new_round.active_piece
+        return current_round.active_piece
 
     def set_players(self, user_profile_1, user_profile_2):
         """Takes two profiles, sets them as players of the game."""
@@ -184,19 +199,26 @@ class Game(models.Model):
 
     def move_piece(self, id1, id2, ticket, user_profile):
         self.current_round
-        if self.validate_move(self, id1, id2, ticket, user_profile) is True:
+        if self.validate_move(id1, id2, ticket, user_profile) is True:
             if self.active_piece == 'mrx':
-                self.current_round.mrx_loc = id2
-                self._move_helper(self, self.mrx, ticket)
+                current = self.current_round
+                current.mrx_loc = id2
+                current.save()
+                self._move_helper(self.mrx, ticket)
             else:
-                target = self.current_round.__getattribute__(self.active_piece + '_loc')
+                current = self.current_round
+                target = current.__getattribute__(self.active_piece + '_loc')
                 target = id2
                 piece = self.dets.get(role=self.active_piece)
-                self._move_helper(self, piece, ticket)
+                give_to_x = self.mrx.__getattribute__(ticket)
+                give_to_x += 1
+                self._move_helper(piece, ticket)
+                current.save()
 
     def _move_helper(self, piece, ticket):
         target = piece.__getattribute__(ticket)
         target -= 1
+        piece.save()
 
     """MAIN MOVE VALIDATOR"""
 
@@ -204,7 +226,7 @@ class Game(models.Model):
         """Return True if move is validated."""
         #  TODO: Figure out how to catch error messages as they bubble up.
         occupied = self.get_locations()
-        if self._wrong_player(self, user_profile):
+        if self._wrong_player(user_profile):
             return "NOTYA TURN"
         try:
             self._wrong_piece(id1)
@@ -218,10 +240,10 @@ class Game(models.Model):
             return "YA DONE GOOFED."
         if not self._has_ticket(ticket):
             return "YA BROKE, SON."
-        if self._check_capture(self, id2, occupied):
-            return self._check_capture(self, id2, occupied)
-        if self._space_occupied(self, id1, id2, occupied):
-            return self._space_occupied(self, id1, id2, occupied)
+        if self._check_capture(id2, occupied):
+            return self._check_capture(id2, occupied)
+        if self._space_occupied(id1, id2, occupied):
+            return self._space_occupied(id1, id2, occupied)
         return True
 
     """VALIDATION HELPER METHODS"""
@@ -323,16 +345,12 @@ class Round(models.Model):
             return 'det4'
         if not self.det5_loc:
             return 'det5'
-        if not self.det6_loc:
-            return 'det6'
 
     @property
     def complete(self):
         """Return True if all rounds in field are truthy, else false."""
-        for field in self:
-            if not field:
-                return False
-        return True
+        if not self._active_piece():
+            return True
 
 
 @python_2_unicode_compatible
