@@ -293,6 +293,23 @@ class MethodsCase(TestCase):
             self.assertIs(8, target)
             self.assertEquals(d.taxi, 9)
 
+        def test_move_not_on_board(self):
+            """Checking move validator"""
+            self.game_1.current_round.mrx_loc = 75
+            self.game_1.make_new_round()
+            #  tests that a move to an unconnected node fails
+            self.game_1.move_piece(75, 1, 'taxi')
+            self.assertIsNot(1, self.current_round.mrx_loc)
+            self.game_1.move_piece(75, 94, 'underground')
+            #  tests that a move to a node unconnected by a specific type fails
+            self.assertIsNot(94, self.current_round.mrx_loc)
+            self.game_1.move_piece(75, 300, 'taxi')
+            #  tests that a move off the board fails
+            self.assertIsNot(300, self.current_round.mrx_loc)
+            self.game_1.mrx.taxi = 0
+            self.game_1.move_piece(75, 94, 'taxi')
+            #  tests that a valid move without a matching ticket fails
+            self.assertIsNot(94, self.current_round.mrx_loc)
 
 """Test BOARD"""
 
