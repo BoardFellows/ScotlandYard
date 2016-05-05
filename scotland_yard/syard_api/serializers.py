@@ -61,13 +61,13 @@ class GameSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Modified create method to encrypt password to save in db."""
         player1 = get_auth_user(self.context['request']).profile
-        # player2 = 
+        player2 = User.objects.get(email=validated_data['otherPlayer']).profile
         game = Game(
-            host=host,
+            host=player1,
             player_1_is_x=validated_data['gameCreatorIsMrX']
         )
         game.save()
-        game.set_players(player_1, player2)
+        game.set_players(player1, player2)
         return game
 
     def update(self, instance, validated_data):
