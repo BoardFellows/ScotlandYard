@@ -4,10 +4,11 @@ from django.views.decorators.http import require_GET
 from rest_framework.authtoken.models import Token
 from rest_framework import (
     viewsets,
-    generics,
     permissions,
-    mixins,
+    status,
+
 )
+from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth.models import User
 from syard_api.permissions import IsCreateOrIsOwner
@@ -41,11 +42,15 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsCreateOrIsOwner,)
 
     def create(self, request):
+        print(request.data)
         response = super(UserViewSet, self).create(request, data=request.data)
         user = User.objects.get(id=response.data['id'])
         token = Token.objects.get(user=user)
         response['authToken'] = token
         return response
+
+    def list(self, request):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 
