@@ -6,6 +6,8 @@ from django.conf import settings
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 
+from syard_main.board import BOARD
+
 
 DETECTIVES = [
     ('det1', 'det1'),
@@ -109,7 +111,7 @@ class Game(models.Model):
         if qs.reverse()[0].__getattribute__(loc):
             return qs.reverse()[0].__getattribute__(loc)
         else:
-            return qs.reverse()[q].__getattribute__(loc)
+            return qs.reverse()[1].__getattribute__(loc)
 
     def get_locations(self):
         """Return a dictionary with the location of each piece on the board."""
@@ -132,6 +134,13 @@ class Game(models.Model):
     def round_number(self):
         """Turn Number."""
         return self.rounds.count() - 1
+
+    @property
+    def current_round(self):
+        "Check if new round needed and return current round"
+        if self.rounds.latest.complete():
+            self.make_new_round()
+        return self.rounds.latest()
 
     @property
     def active_piece(self):
@@ -166,6 +175,92 @@ class Game(models.Model):
             new_round = Round(game=self.game, num=(self.round_number + 1))
         return new_round.active_piece
 
+    def set_players(self, user_profile_1, user_profile_2):
+        """Takes two profiles, sets them as players of the game."""
+        user_profile_1.player_1.add(self)
+        user_profile_2.player_2.add(self)
+        self.users.add(self.player_1)
+        self.users.add(self.player_2)
+
+    def move_piece(self, id1, id2, ticket):
+        if self.validate_move(self, id1, id2, ticket) is True:
+            if self.active_piece == 'mrx':
+                self.current_round.mrx_loc = id2
+                self._move_helper(self, self.mrx, ticket)
+            else:
+                target = self.current_round.__getattribute__(self.active_piece + '_loc')
+                target = id2
+                piece = self.dets.get(role=self.active_piece)
+                self._move_helper(self, piece, ticket)
+
+    def _move_helper(self, piece, ticket):
+        target = piece.__getattribute__(ticket)
+        target -= 1
+    """MAIN MOVE VALIDATOR"""
+
+    def validate_move(self, id1, id2, ticket):
+        """Return True if move is validated."""
+        #  TODO: Figure out how to catch error messages as they bubble up.
+        try:
+            self._wrong_piece(self, id1)
+        except ValueError:
+            return "YA DONE GOOFED"
+        try:
+            self._invalid_move(self, id1, id2)
+        except KeyError:
+            return "YA DONE GOOFED."
+        if not self._legal_move:
+            return "YA DONE GOOFED."
+        if not self._has_ticket:
+            return "YA BROKE, SON."
+        return True
+
+    """VALIDATION HELPER METHODS"""
+
+    def _wrong_piece(self, id1):
+        """Validate id1 against location of active piece."""
+        if self._piece_location(self.active_piece) != id1:
+            msg = ("It is {}'s move. {} is at space {}.".format(
+                self.active_piece,
+                self.active_piece,
+                self._piece_location(self.active_piece)
+            ))
+            raise ValueError(msg)
+
+    def _invalid_move(self, id1, id2):
+        """Check that start and end locations are on the board."""
+        try:
+            self.board[id1]
+        except KeyError:
+            raise KeyError('Your start location is not on the board.')
+        try:
+            self.board[id2]
+        except KeyError:
+            raise KeyError('Your end location is not on the board.')
+
+    def _legal_move(self, id1, id2, ticket):
+        """Check that start and end nodes are connected by ticket method."""
+        if ticket is not "black":
+            return True if id2 in BOARD[id1][ticket] else False
+        else:
+            for ticket in self.board[id1]:
+                if id2 in self.board[id1[ticket]]:
+                    return True
+            return False
+
+    def _has_ticket(self, ticket):
+        """Check that the piece to be moved as an appropriate ticket"""
+        t = ticket
+        if self.active_piece == 'mrx':
+            return True if self.mrx.__getattribute__(t) > 0 else False
+        else:
+            d = self.dets.get(role=self.active_piece)
+            return True if d.__getattribute__(t) > 0 else False
+
+    def _real_move(self, id1, id2):
+        """Check that a proposed move is actually a move"""
+        return True if id1 != id2 else False
+
 
 @python_2_unicode_compatible
 class Round(models.Model):
@@ -192,7 +287,7 @@ class Round(models.Model):
         return self._active_piece()
 
     def _active_piece(self):
-        """Return the piece (x, r, y, g, b, p) to move next"""
+        """Return the piece to move next"""
         if not self.mrx_loc:
             return 'mrx'
         if not self.det1_loc:
