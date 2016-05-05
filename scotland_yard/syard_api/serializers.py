@@ -55,7 +55,9 @@ class GameSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """Modified create method to encrypt password to save in db."""
-        host = self.context['request'].user.profile
+        request_token = self.context['request'].META['HTTP_AUTHORIZATION']
+        token = Token.objects.get(key=request_token.split()[1])
+        host = token.user.profile
         game = Game(
             host=host,
             player_1=host
