@@ -102,18 +102,14 @@ class Game(models.Model):
         """Return string output of username."""
         return str(self.id)
 
-    def turn_number(self):
-        """Turn Number."""
-        return self.rounds.count()
-
     def _piece_location(self, piece):
         """Return most recent location of a piece, identified by name."""
         loc = "".join([piece, "_loc"])
         qs = self.rounds.all()
-        if qs[-1].__getattribute__(loc):
-            return qs[-1].__getattribute__(loc)
+        if qs.reverse()[0].__getattribute__(loc):
+            return qs.reverse()[0].__getattribute__(loc)
         else:
-            return qs[-2].__getattribute__(loc)
+            return qs.reverse()[q].__getattribute__(loc)
 
     def get_locations(self):
         """Return a dictionary with the location of each piece on the board."""
@@ -132,7 +128,43 @@ class Game(models.Model):
         output = [starts.pop(randrange(0, len(starts))) for x in range(6)]
         return output
 
-    # current player
+    @property
+    def round_number(self):
+        """Turn Number."""
+        return self.rounds.count() - 1
+
+    @property
+    def active_piece(self):
+        """Return the piece to move next"""
+        current_round = self.rounds.latest()
+        return current_round.active_piece
+
+    @property
+    def active_player(self):
+        return self._active_player
+
+    def _active_player(self):
+        if (
+            (self.active_piece == 'mrx' and self.player_1_is_x) or
+            (self.active_piece != 'mrx' and not self.player_1_is_x)
+        ):
+            return self.player_1
+        else:
+            return self.player_2
+
+    def _x_wins_by_turns(self):
+        """Check for Game Over by number of turns, to be used below."""
+        if self.rounds.latest().complete and self.round_number == 22:
+            return True
+
+    def make_new_round(self):
+        """Add a new round if round complete and new round needed."""
+        if self._x_wins_by_turns():
+            return 'X Wins.'
+        current_round = self.rounds.latest()
+        if current_round.complete():
+            new_round = Round(game=self.game, num=(self.round_number + 1))
+        return new_round.active_piece
 
 
 @python_2_unicode_compatible
@@ -155,13 +187,34 @@ class Round(models.Model):
         """Return string output of username."""
         return "game: {}, turn: {}".format(str(self.game.id), str(self.id))
 
-    def get_active_piece(self):
-        """Return the piece (x, r, y, g, b, p) to move next"""
-        pass
+    @property
+    def active_piece(self):
+        return self._active_piece()
 
+    def _active_piece(self):
+        """Return the piece (x, r, y, g, b, p) to move next"""
+        if not self.mrx_loc:
+            return 'mrx'
+        if not self.det1_loc:
+            return 'det1'
+        if not self.det2_loc:
+            return 'det2'
+        if not self.det3_loc:
+            return 'det3'
+        if not self.det4_loc:
+            return 'det4'
+        if not self.det5_loc:
+            return 'det5'
+        if not self.det6_loc:
+            return 'det6'
+
+    @property
     def complete(self):
         """Return True if all rounds in field are truthy, else false."""
-        pass
+        for field in self:
+            if not field:
+                return False
+        return True
 
 
 @python_2_unicode_compatible
@@ -180,8 +233,6 @@ class MrX(models.Model):
             str(self.game.turn_number()),
             str(self.game._piece_location('mrx'))
         )
-        #  msg = ()
-        #  return "game: {}, turn: {}, position: {},/n Tickets: /n taxi: {}, bus: {}, undergroud: {}, black: {}, x2: {}".format(str(self.game.id), str(self.game.turn_number()), str(self.game._piece_location('mrx')), str(self.taxi), str(self.bus), str(self.underground), str(self.black), str(self.x2))))
 
 
 @python_2_unicode_compatible
