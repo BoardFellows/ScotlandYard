@@ -7,6 +7,13 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
 from rest_framework import HTTP_HEADER_ENCODING, exceptions
+from rest_framework.authtoken.models import Token
+
+
+def get_auth_user(request):
+    auth_header = get_auth_header(request)
+    return Token.objects.get(key=auth_header[1]).user
+
 
 def get_auth_header(request):
     """Get auth header and return as list split on white space."""

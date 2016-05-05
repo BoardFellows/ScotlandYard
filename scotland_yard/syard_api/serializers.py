@@ -1,13 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from syard_main.models import UserProfile, Game, Round
-from rest_framework.authtoken.models import Token
-from syard_api.permissions import get_auth_header
-
-
-def get_auth_user(request):
-    auth_header = get_auth_header(request)
-    return Token.objects.get(key=auth_header[1]).user
+from syard_main.models import Game
+from syard_api.helper import get_auth_user
 
 
 class UserSerializer(serializers.ModelSerializer):
