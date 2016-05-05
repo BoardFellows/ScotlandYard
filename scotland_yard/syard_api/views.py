@@ -37,7 +37,7 @@ class UserViewSet(viewsets.ModelViewSet):
         """Create User and Send token in as header."""
         response = super(UserViewSet, self).create(request, data=request.data)
         user = User.objects.get(id=response.data['id'])
-        response['authToken'] = Token.objects.get(user=user) 
+        response['authToken'] = Token.objects.get(user=user)
         return response
 
     def list(self, request):

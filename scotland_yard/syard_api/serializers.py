@@ -10,16 +10,6 @@ def get_auth_user(request):
     return Token.objects.get(key=auth_header[1]).user
 
 
-# class ProfileSerializer(serializers.ModelSerializer):
-#     """Serialization of Profiles."""
-
-#     class Meta:
-#         """Meta."""
-
-#         model = UserProfile
-#         fields = ('friends', 'games')
-
-
 class UserSerializer(serializers.ModelSerializer):
     """Serialization of Users."""
 
