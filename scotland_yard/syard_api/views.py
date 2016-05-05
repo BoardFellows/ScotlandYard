@@ -6,10 +6,7 @@ from rest_framework import viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
-from syard_api.permissions import (
-    IsCreateOrIsAuthorized,
-    HasTokenOrBasic,
-)
+from syard_api.permissions import IsCreateOrIsAuthorized, HasTokenOrBasic
 from syard_api.helper import get_auth_user
 from syard_api.serializers import UserSerializer, GameSerializer
 from syard_main.models import Game

@@ -37,14 +37,3 @@ class IsCreateOrIsAuthorized(permissions.BasePermission):
         if request.method == "POST":
             return True
         return check_for_auth(request, obj)
-
-
-class HasToken(permissions.BasePermission):
-    """Permission class that checks for auth token."""
-
-    def has_object_permission(self, request, view, obj):
-        """Check for HTTP_AUTHORIZATION IN HEADERS."""
-        try:
-            return get_auth_header(request)[0] == "Token"
-        except KeyError:
-            return False
