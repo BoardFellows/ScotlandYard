@@ -1,36 +1,20 @@
-# from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from rest_framework.authtoken.models import Token
-from rest_framework import (
-    viewsets,
-    permissions,
-    status,
-
-)
+from rest_framework import (viewsets, permissions, status,)
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth.models import User
 from syard_api.permissions import IsCreateOrIsOwner
-# from django.shortcuts import get_object_or_404
-from syard_main.models import (
-    # UserProfile,
-    Game,
-    # Round
-)
-from syard_api.serializers import (
-    UserSerializer,
-    # ProfileSerializer,
-    GameSerializer,
-    # RoundSerializer,
-    # BoardSerializer,
-)
+from syard_api.serializers import (UserSerializer, GameSerializer,)
+from syard_main.models import (Game,)
+from syard_main.board import BOARD
 
 
 @require_GET
 def board_view(request):
     """Return the Board with a get request."""
-    data = {'board': {'a': 'b'}}
+    data = BOARD
     return JsonResponse(data)
 
 class UserViewSet(viewsets.ModelViewSet):
