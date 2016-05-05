@@ -6,6 +6,8 @@ from django.conf import settings
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 
+from syard_main.board import BOARD
+
 
 DETECTIVES = [
     ('det1', 'det1'),
@@ -109,7 +111,7 @@ class Game(models.Model):
         if qs.reverse()[0].__getattribute__(loc):
             return qs.reverse()[0].__getattribute__(loc)
         else:
-            return qs.reverse()[q].__getattribute__(loc)
+            return qs.reverse()[1].__getattribute__(loc)
 
     def get_locations(self):
         """Return a dictionary with the location of each piece on the board."""
@@ -165,6 +167,25 @@ class Game(models.Model):
         if current_round.complete():
             new_round = Round(game=self.game, num=(self.round_number + 1))
         return new_round.active_piece
+
+    def set_players(self, user_profile_1, user_profile_2):
+        """Takes two profiles, sets them as players of the game."""
+        user_profile_1.player_1.add(self)
+        user_profile_2.player_2.add(self)
+        self.users.add(self.player_1)
+        self.users.add(self.player_2)
+
+    def validate_move(self, id1, id2, ticket):
+        try:
+            if ticket is not "black":
+                return True if id2 in BOARD[id1][ticket] else False
+            else:
+                for ticket in self.board[id1]:
+                    if id2 in self.board[id1[ticket]]:
+                        return True
+                return False
+        except KeyError():
+            raise KeyError("Either your start or end location isn't on the board.")
 
 
 @python_2_unicode_compatible
