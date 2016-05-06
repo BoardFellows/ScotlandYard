@@ -1,26 +1,9 @@
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from django.contrib.auth.models import User
-<<<<<<< HEAD
+from syard_api.test_factory import UserFactory, GameFactory
+from syard_main.models import Round
 import json
-
-
-class UserFactory(factory.django.DjangoModelFactory):
-    """Create Test User Factory."""
-
-    class Meta():
-        """Model is User."""
-
-        model = settings.AUTH_USER_MODEL
-
-
-class GameFactory(factory.django.DjangoModelFactory):
-    """Create Test Game Factory."""
-
-    class Meta():
-        """Model is Game."""
-
-        model = Game
 
 
 class EndPointTests(APITestCase):
@@ -30,13 +13,20 @@ class EndPointTests(APITestCase):
         """Set up User Endpoint tests."""
         self.selena = UserFactory.create(
             username='seleniumk',
-            email='test@foo.com'
+            email='s@foo.com'
         )
+        self.selena.set_password('markdown')
         self.patrick = UserFactory.create(
             username='ptrompeter',
-            email='test@foo.com'
+            email='p@foo.com'
         )
-        self.frasier = UserFactory.create()
+        self.patrick.set_password('beyonce')
+        self.frasier = UserFactory.create(
+            username='frasier',
+            email='f@foo.com'
+
+        )
+        self.frasier.set_password('tswift')
         self.game1 = GameFactory.create(
             host=self.selena.profile,
             player_1=self.selena.profile,
@@ -46,24 +36,41 @@ class EndPointTests(APITestCase):
 
         )
         self.game2 = GameFactory.create(
-            host=self.frasier,
-            player_1=self.frasier,
+            host=self.frasier.profile,
+            player_1=self.frasier.profile,
             player_2=self.patrick.profile,
         )
+        self.client = APIClient(enforce_csrf_checks=True)
 
     def test_post_users_list(self):
         """Assert that POST /users/ creates a new user."""
-        self.assertEqual(User.objects.count(), 2)
+        self.assertEqual(User.objects.count(), 3)
         url = '/users/'
         data = {'username': 'Phil', 'email': 'test@foo.com', 'password': 'something'}
-        client = APIClient(enforce_csrf_checks=True)
-        request = client.post(url, data, format='json')
+        request = self.client.post(url, data, format='json')
         self.assertEqual(request.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(User.objects.count(), 3)
+        self.assertEqual(User.objects.count(), 4)
 
     def test_get_board(self):
         """Assert that GET /board returns a JSON representation of the board."""
-        pass
+        request = self.client.get('/board')
+        self.assertEqual(request.status_code, status.HTTP_200_CREATED)
+
+    def test_move_x(self):
+        game_id = self.game2.id
+        rnd = self.game2.current_round
+        rnd.mrx_loc = 26
+        rnd.det1_loc = 3
+        rnd.save()
+        new_round = Round(game=self.game2, num=2)
+        new_round.save()
+        data = {'player': 'mrx', 'nodeId': 27, 'tokenType': 'taxi'}
+        request = self.client.put('/games/{}/'.format(game_id), data, format='json')
+        data = {'player': 'det1', 'nodeId': 4, 'tokenType': 'taxi'}
+        self.assertEqual(self.game2.current_round.mrx_loc, 27)
+        self.assertEqual(self.game2.current_round.det1_loc, 4)
+
+
 
     def test_get_users_list(self):
         """Assert that GET /users/ with works with basic auth."""

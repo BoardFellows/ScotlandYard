@@ -247,7 +247,7 @@ class Game(models.Model):
     """VALIDATION HELPER METHODS"""
 
     def _wrong_player(self, user_profile):
-        if user_profile is not self.active_player:
+        if user_profile != self.active_player:
             return "wrong player"
 
     def _wrong_piece(self, id1):

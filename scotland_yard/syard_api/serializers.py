@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from syard_main.models import Game, UserProfile
+from syard_main.models import Game
 from syard_api.helper import get_auth_user
-
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -61,13 +60,14 @@ class GameSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """Update current round of game."""
+        # import pdb; pdb.set_trace()
         request_data = self.context['request'].data
         player_profile = get_auth_user(self.context['request'], token_only=True).profile
-        if request_data['player'] == 'mrx':
-            cur_node = instance.current_round.mrx_loc
-        else:
-            cur_node = instance.current_round.det1_loc
-        next_node = request_data['nodeId']
+        role = request_data['player'] 
+        cur_node = instance.get_locations()[role]
+        next_node = int(request_data['nodeId'])
         ticket = request_data['tokenType']
         instance.move_piece(cur_node, next_node, ticket, player_profile)
+        instance.save()
+        print(instance.current_round.mrx_loc)
         return instance

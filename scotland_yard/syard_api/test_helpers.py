@@ -23,14 +23,14 @@ class HelperTests(APITestCase):
         """Set up User Endpoint tests."""
         self.selena = UserFactory.create(
             username='seleniumk',
-            password='markdown',
             email='selena@foo.com'
         )
+        self.selena.set_password('markdown')
         self.patrick = UserFactory.create(
             username='ptrompeter',
-            password='beyonce',
             email='patrick@foo.com'
         )
+        self.patrick.set_password('beyonce')
         self.game1 = GameFactory.create(
             host=self.selena.profile,
             player_1=self.selena.profile,
@@ -51,11 +51,11 @@ class HelperTests(APITestCase):
         self.assertEqual(token_count, user_count)
 
     # def test_credentials(self):
-        # """Assert check_credentials returns authenticated user."""
-        # p = {'username': 'ptrompeter', 'password': 'beyonce'}
-        # s = {'username': 'seleniumk', 'password': 'markdown'}
-        # self.assertEqual(self.patrick, check_credentials(p))
-        # self.assertEqual(self.selena, check_credentials(s))
+    #     """Assert check_credentials returns authenticated user."""
+    #     p = {'username': 'ptrompeter', 'password': 'beyonce'}
+    #     s = {'username': 'seleniumk', 'password': 'markdown'}
+    #     self.assertEqual(self.patrick, check_credentials(p))
+    #     self.assertEqual(self.selena, check_credentials(s))
 
     def test_credentials_fails(self):
         """Assert that if credentials are not valid, check_credentials raises appropriate error."""
