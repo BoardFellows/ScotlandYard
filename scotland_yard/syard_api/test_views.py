@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from django.contrib.auth.models import User
 from syard_api.test_factory import UserFactory, GameFactory
+from syard_main.models import Round
 import json
 
 
@@ -54,7 +55,22 @@ class EndPointTests(APITestCase):
         """Assert that GET /board returns a JSON representation of the board."""
         request = self.client.get('/board')
         self.assertEqual(request.status_code, status.HTTP_200_CREATED)
-        
+
+    def test_move_x(self):
+        game_id = self.game2.id
+        rnd = self.game2.current_round
+        rnd.mrx_loc = 26
+        rnd.det1_loc = 3
+        rnd.save()
+        new_round = Round(game=self.game2, num=2)
+        new_round.save()
+        data = {'player': 'mrx', 'nodeId': 27, 'tokenType': 'taxi'}
+        request = self.client.put('/games/{}/'.format(game_id), data, format='json')
+        data = {'player': 'det1', 'nodeId': 4, 'tokenType': 'taxi'}
+        self.assertEqual(self.game2.current_round.mrx_loc, 27)
+        self.assertEqual(self.game2.current_round.det1_loc, 4)
+
+
 
     def test_get_users_list(self):
         """Assert that GET /users/ with works with basic auth."""

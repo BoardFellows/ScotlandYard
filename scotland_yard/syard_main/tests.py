@@ -355,9 +355,9 @@ class MethodsCase(TestCase):
         current_round.save()
         self.assertEquals(self.game_1.move_piece(94, 75, 'taxi', self.user_2.profile), self.game_1.player_2)
 
-    def test_x_wins_by_turns(self):
-        self.game_1.round_number = 22
-        self.assertTrue(self.game_1._x_wins_by_turns())
+    # def test_x_wins_by_turns(self):
+    #     self.game_1.round_number = 22
+    #     self.assertTrue(self.game_1._x_wins_by_turns())
 
 
 
