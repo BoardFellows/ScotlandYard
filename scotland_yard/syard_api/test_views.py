@@ -39,35 +39,23 @@ class EndPointTests(APITestCase):
             username='ptrompeter',
             email='test@foo.com'
         )
-        self.expected_user_keys = ['id', 'username', 'email', 'password', 'profile']
+        self.frasier = UserFactory.create()
         self.game1 = GameFactory.create(
             host=self.selena.profile,
+            player_1=self.selena.profile,
+            player_2=self.patrick.profile,
             winner=self.patrick,
             complete=True,
 
         )
+        self.game2 = GameFactory.create(
+            host=self.frasier,
+            player_1=self.frasier,
+            player_2=self.patrick.profile,
+        )
 
-    def test_get_users_list(self):
-        """Assert that the user endpoint responds to a get request."""
-        url = '/users/'
-        request = self.client.get(url)
-        self.assertEqual(request.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.selena.username, request.data[0].get('username'))
-        self.assertEqual(self.patrick.username, request.data[1].get('username'))
-        self.assertEqual(self.expected_user_keys, list(request.data[0].keys()))
-
-    def test_get_user_detail(self):
-        """Assert that user detail endpoint contains necessary info."""
-        url = '/users/' + str(self.selena.id) + '/'
-        request = self.client.get(url)
-        self.assertEqual(request.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.expected_user_keys, list(request.data.keys()))
-        self.assertEqual(self.selena.id, request.data.get('id'))
-        self.assertEqual(self.selena.username, request.data.get('username'))
-        self.assertEqual(self.selena.email, request.data.get('email'))
-
-    def test_post_user_detail(self):
-        """Assert that new users can be added using post method."""
+    def test_post_users_list(self):
+        """Assert that POST /users/ creates a new user."""
         self.assertEqual(User.objects.count(), 2)
         url = '/users/'
         data = {'username': 'Phil', 'email': 'test@foo.com', 'password': 'something'}
@@ -76,7 +64,45 @@ class EndPointTests(APITestCase):
         self.assertEqual(request.status_code, status.HTTP_201_CREATED)
         self.assertEqual(User.objects.count(), 3)
 
-    def test_get_game_list(self):
-        url = '/games/'
-        request = self.client.get(url)
-        self.assertEqual(request.status_code, status.HTTP_200_OK)
+    def test_get_board(self):
+        """Assert that GET /board returns a JSON representation of the board."""
+        pass
+
+    def test_get_users_list(self):
+        """Assert that GET /users/ with works with basic auth."""
+        pass
+
+    def test_get_users_list_fails(self):
+        """Assert that GET /users/ fails without basic auth."""
+        pass
+
+    def test_get_user_detail(self):
+        """Assert that GET /users/:id is successful with token auth."""
+        pass
+
+    def test_get_user_detail_fails(self):
+        """Assert that GET /users/:id is fails without token auth."""
+        pass
+
+    def test_get_games(self):
+        """Assert that GET /games/ returns all user's games."""
+        pass
+
+    def test_get_games_fails(self):
+        """Assert that GET /games/ does not return other user's games."""
+        pass
+
+    def test_post_games(self):
+        """Assert that POST /games/ creates a new game if authenticated."""
+        pass
+
+    def test_post_games_fails(self):
+        """Assert that POST /games/ fails if not authenticated."""
+        pass
+
+    def test_get_game_detail(self):
+        """Assert that GET /games/:id returns game information."""
+        pass
+
+    def test_update_game_state(self):
+        """Assert that PUT /games/:id updates moves/returns games state."""
