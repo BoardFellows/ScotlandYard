@@ -1,8 +1,20 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from syard_main.models import Game
+from syard_main.models import Game, UserProfile
 from syard_api.helper import get_auth_user
 
+
+class ProfileSerializer(serializers.ModelSerializer):
+    """Serialization of games."""
+
+    class Meta:
+        """Meta."""
+
+        model = UserProfile
+        # depth = 1
+        fields = (
+            'user', 'friends', 'games',
+        )
 
 class UserSerializer(serializers.ModelSerializer):
     """Serialization of Users."""
