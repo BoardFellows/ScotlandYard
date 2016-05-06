@@ -201,23 +201,25 @@ class Game(models.Model):
         self.current_round
         if self.validate_move(id1, id2, ticket, user_profile) is True:
             if self.active_piece == 'mrx':
-                current = self.current_round
+                current = self.rounds.latest('date_modified')
                 current.mrx_loc = id2
                 current.save()
-                self._move_helper(self.mrx, ticket)
+                # self._move_helper(self.mrx, ticket)
             else:
                 current = self.current_round
-                target = current.__getattribute__(self.active_piece + '_loc')
-                target = id2
+                current.__setattr__(self.active_piece + '_loc', id2)
                 piece = self.dets.get(role=self.active_piece)
-                give_to_x = self.mrx.__getattribute__(ticket)
+                give_to_x = getattr(self.mrx, ticket)
                 give_to_x += 1
+                self.save()
+                self.mrx.save()
                 self._move_helper(piece, ticket)
                 current.save()
 
     def _move_helper(self, piece, ticket):
-        target = piece.__getattribute__(ticket)
-        target -= 1
+        num = getattr(piece, ticket)
+        num -= 1
+        setattr(piece, ticket, num)
         piece.save()
 
     """MAIN MOVE VALIDATOR"""
@@ -265,11 +267,11 @@ class Game(models.Model):
     def _invalid_move(self, id1, id2):
         """Check that start and end locations are on the board."""
         try:
-            self.board[id1]
+            BOARD[id1]
         except KeyError:
             raise KeyError('Your start location is not on the board.')
         try:
-            self.board[id2]
+            BOARD[id2]
         except KeyError:
             raise KeyError('Your end location is not on the board.')
 
@@ -278,8 +280,8 @@ class Game(models.Model):
         if ticket is not "black":
             return True if id2 in BOARD[id1][ticket] else False
         else:
-            for ticket in self.board[id1]:
-                if id2 in self.board[id1[ticket]]:
+            for ticket in BOARD[id1]:
+                if id2 in BOARD[id1[ticket]]:
                     return True
             return False
 
@@ -302,7 +304,7 @@ class Game(models.Model):
             return self.active_player
 
     def _space_occupied(self, id1, id2, occupied):
-        for name, id in occupied:
+        for name, id in occupied.items():
             if id2 == id:
                 return "location {} is occupied by {}".format(id, name)
 
@@ -366,7 +368,7 @@ class MrX(models.Model):
         """Return string output of MrX."""
         return "game: {}, turn: {}, position: {}".format(
             str(self.game.id),
-            str(self.game.turn_number()),
+            str(self.game.round_number),
             str(self.game._piece_location('mrx'))
         )
 
@@ -380,9 +382,9 @@ class Detective(models.Model):
     underground = models.IntegerField(default=4)
 
     def __str__(self):
-        """Return string output of MrX."""
+        """Return string output of a detective."""
         return "game: {}, turn: {}, position: {}".format(
             str(self.game.id),
-            str(self.game.turn_number()),
+            str(self.game.round_number),
             str(self.game._piece_location('{}'.format(self.role)))
         )

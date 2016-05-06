@@ -280,27 +280,29 @@ class MethodsCase(TestCase):
         rnd.save()
         new_round = Round(game=self.game_1, num=(self.game_1.round_number + 1))
         new_round.save()
-        import pdb; pdb.set_trace()
         self.game_1.move_piece(75, 94, 'taxi', self.user_1.profile)
+        rnd = self.game_1.current_round
         self.assertIs(94, rnd.mrx_loc)
 
     def test_move_det(self):
         """Add new round, move mrx & det1, add new round, make legal move with mrx & det1, test that det1 moved and ticket was subtracted."""
         current = self.game_1.current_round
         current.mrx_loc = 75
+        current.save()
         piece = self.game_1.active_piece
-        d = self.game_1.dets.get(role=piece)
+        d1 = self.game_1.dets.get(role=piece)
         rnd = self.game_1.current_round
-        target = rnd.__getattribute__(piece)
-        target = 1
+        rnd.__setattr__(piece + '_loc', 1)
+        rnd.save()
         new_round = Round(game=self.game_1, num=(self.game_1.round_number + 1))
         new_round.save()
         self.game_1.move_piece(75, 94, 'taxi', self.user_1.profile)
         self.game_1.move_piece(1, 8, 'taxi', self.user_2.profile)
         rnd = self.game_1.current_round
-        target = rnd.__getattribute__(piece)
+        target = rnd.det1_loc
         self.assertIs(8, target)
-        self.assertEquals(d.taxi, 9)
+        d1 = self.game_1.dets.get(role=piece)
+        self.assertEquals(d1.taxi, 9)
 
     def test_move_validation(self):
         """Checking move validator"""
@@ -332,7 +334,6 @@ class MethodsCase(TestCase):
         self.game_1.move_piece(75, 94, 'taxi', wrong_player)
         self.assertIsNot(94, rnd.mrx_loc)
         self.assertIs(75, rnd.mrx_loc)
-
 
 
 """Test BOARD"""
