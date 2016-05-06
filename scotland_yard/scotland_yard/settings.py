@@ -22,7 +22,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ("authToken",)
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = [*]
 
 INSTALLED_APPS = [
     'syard_main.apps.SyardMainConfig',
