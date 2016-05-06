@@ -60,7 +60,6 @@ class GameSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """Update current round of game."""
-        # import pdb; pdb.set_trace()
         request_data = self.context['request'].data
         player_profile = get_auth_user(self.context['request'], token_only=True).profile
         role = request_data['player'] 
