@@ -4,17 +4,6 @@ from syard_main.models import Game, UserProfile
 from syard_api.helper import get_auth_user
 
 
-class ProfileSerializer(serializers.ModelSerializer):
-    """Serialization of games."""
-
-    class Meta:
-        """Meta."""
-
-        model = UserProfile
-        # depth = 1
-        fields = (
-            'user', 'friends', 'games',
-        )
 
 class UserSerializer(serializers.ModelSerializer):
     """Serialization of Users."""
@@ -51,7 +40,7 @@ class GameSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'host', 'date_created',
             'date_modified', 'player_1', 'player_2',
-            'active_player', 'round_number', 'current_round', 'rounds',
+            'round_number', 'rounds',
             'complete', 'winner'
         )
 
@@ -59,10 +48,12 @@ class GameSerializer(serializers.ModelSerializer):
         """Modified create method to encrypt password to save in db."""
         request = self.context['request']
         player1 = get_auth_user(request, token_only=True).profile
-        player2 = User.objects.get(email=request.data['otherPlayer']).profile
+        email = request.data['otherPlayer']
+        player2 = User.objects.get(email=email).profile
         game = Game(
             host=player1,
-            player1_is_x=request.data['gameCreatorIsMrX']
+            player1_is_x=request.data['gameCreatorIsMrX'],
+            player_1=player1,
         )
         game.save()
         game.set_players(player1, player2)

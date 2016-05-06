@@ -56,12 +56,12 @@ class UserProfile(models.Model):
 
     def __str__(self):
         """Return string output of username."""
-        return self.user.get_full_name() or self.user.username
+        return self.user.username
 
-    @property
-    def is_active(self):
-        """Return a boolean value indicating whether User is active."""
-        return self._is_active
+    # @property
+    # def is_active(self):
+    #     """Return a boolean value indicating whether User is active."""
+    #     return self._is_active
 
     active = ActiveUserManager()
     objects = models.Manager()
