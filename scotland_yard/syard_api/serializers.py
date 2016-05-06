@@ -39,7 +39,8 @@ class GameSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'host', 'date_created',
             'date_modified', 'player_1', 'player_2',
-            'active_player', 'round_number', 'current_round', 'rounds',
+            # 'active_player', 'round_number', 'current_round',
+            'rounds',
             'complete', 'winner'
         )
 
@@ -53,7 +54,7 @@ class GameSerializer(serializers.ModelSerializer):
             player1_is_x=request.data['gameCreatorIsMrX']
         )
         game.save()
-        game.set_players(player1, player2)
+        # game.set_players(player1, player2)
         return game
 
     def update(self, instance, validated_data):
@@ -66,5 +67,5 @@ class GameSerializer(serializers.ModelSerializer):
             cur_node = instance.current_round.det1_loc
         next_node = request_data['nodeId']
         ticket = request_data['tokenType']
-        instance.move_piece(cur_node, next_node, ticket, player_profile)
+        # instance.move_piece(cur_node, next_node, ticket, player_profile)
         return instance

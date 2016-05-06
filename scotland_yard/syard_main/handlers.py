@@ -40,36 +40,36 @@ def remove_user_profile(sender, **kwargs):
         logger.warn(msg.format(kwargs['instance']))
 
 
-@receiver(post_save, sender=Game)
-def make_piece_models(sender, instance, **kwargs):
-    #  TODO: Refactor this to make it less butt ugly.
-    """Add pieces and starting locations to a board."""
-    if kwargs.get('created', False):
-        # try:
-        starts = instance._start_node_list()
-        mrx = MrX(game=instance)
-        det1 = Detective(game=instance, role='det1')
-        det2 = Detective(game=instance, role='det2')
-        det3 = Detective(game=instance, role='det3')
-        det4 = Detective(game=instance, role='det4')
-        det5 = Detective(game=instance, role='det5')
-        round1 = Round(
-            game=instance,
-            mrx_loc=starts.pop(),
-            det1_loc=starts.pop(),
-            det2_loc=starts.pop(),
-            det3_loc=starts.pop(),
-            det4_loc=starts.pop(),
-            det5_loc=starts.pop(),
-            num=0
-        )
-        mrx.save()
-        det1.save()
-        det2.save()
-        det3.save()
-        det4.save()
-        det5.save()
-        round1.save()
+# @receiver(post_save, sender=Game)
+# def make_piece_models(sender, instance, **kwargs):
+#     #  TODO: Refactor this to make it less butt ugly.
+#     """Add pieces and starting locations to a board."""
+#     if kwargs.get('created', False):
+#         # try:
+#         starts = instance._start_node_list()
+#         mrx = MrX(game=instance)
+#         det1 = Detective(game=instance, role='det1')
+#         det2 = Detective(game=instance, role='det2')
+#         det3 = Detective(game=instance, role='det3')
+#         det4 = Detective(game=instance, role='det4')
+#         det5 = Detective(game=instance, role='det5')
+#         round1 = Round(
+#             game=instance,
+#             mrx_loc=starts.pop(),
+#             det1_loc=starts.pop(),
+#             det2_loc=starts.pop(),
+#             det3_loc=starts.pop(),
+#             det4_loc=starts.pop(),
+#             det5_loc=starts.pop(),
+#             num=0
+#         )
+#         mrx.save()
+#         det1.save()
+#         det2.save()
+#         det3.save()
+#         det4.save()
+#         det5.save()
+#         round1.save()
 
         # except(KeyError, ValueError):
         #     msg = 'Unable to create Profile for {}'
