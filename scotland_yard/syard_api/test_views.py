@@ -1,10 +1,7 @@
-from syard_main.models import UserProfile, Game
-import factory
-from rest_framework.authtoken.models import Token
 from rest_framework import status
-from rest_framework.test import APITestCase, APIClient, APIRequestFactory
-from django.conf import settings
+from rest_framework.test import APITestCase, APIClient
 from django.contrib.auth.models import User
+<<<<<<< HEAD
 import json
 
 
@@ -106,3 +103,4 @@ class EndPointTests(APITestCase):
 
     def test_update_game_state(self):
         """Assert that PUT /games/:id updates moves/returns games state."""
+        pass
