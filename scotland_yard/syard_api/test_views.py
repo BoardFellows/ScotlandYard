@@ -1,26 +1,8 @@
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from django.contrib.auth.models import User
-<<<<<<< HEAD
+from syard_api.test_factory import UserFactory, GameFactory
 import json
-
-
-class UserFactory(factory.django.DjangoModelFactory):
-    """Create Test User Factory."""
-
-    class Meta():
-        """Model is User."""
-
-        model = settings.AUTH_USER_MODEL
-
-
-class GameFactory(factory.django.DjangoModelFactory):
-    """Create Test Game Factory."""
-
-    class Meta():
-        """Model is Game."""
-
-        model = Game
 
 
 class EndPointTests(APITestCase):
@@ -32,11 +14,19 @@ class EndPointTests(APITestCase):
             username='seleniumk',
             email='test@foo.com'
         )
+        self.selena.set_password('markdown')
+        self.selena.set_password('secret')
         self.patrick = UserFactory.create(
             username='ptrompeter',
             email='test@foo.com'
         )
-        self.frasier = UserFactory.create()
+        self.patrick.set_password('beyonce')
+        self.frasier = UserFactory.create(
+            username='ptrompeter',
+            email='test@foo.com'
+
+        )
+        self.frasier.set_password('tswift')
         self.game1 = GameFactory.create(
             host=self.selena.profile,
             player_1=self.selena.profile,
