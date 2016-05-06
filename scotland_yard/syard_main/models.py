@@ -141,20 +141,6 @@ class Game(models.Model):
             self.make_new_round()
         return self.rounds.latest('date_modified')
 
-    # @current_round.setter
-    # def current_round(self, current_round):
-    #     """Check if new round needed and return current round"""
-    #     if self.rounds.latest('date_modified').complete:
-    #         self.make_new_round()
-    #     self._current_round = self.rounds.latest('date_modified')
-
-    # @property
-    # def current_round1(self):
-    #     "Check if new round needed and return current round"
-    #     if self.rounds.latest('date_modified').complete:
-    #         self.make_new_round()
-    #     return self.rounds.latest('date_modified')
-
     @property
     def active_piece(self):
         """Return the piece to move next"""
@@ -178,6 +164,8 @@ class Game(models.Model):
         """Check for Game Over by number of turns, to be used below."""
         if self.rounds.latest('date_modified').complete and self.round_number == 22:
             return True
+        else:
+            return False
 
     def make_new_round(self):
         """Add a new round if round complete and new round needed."""
@@ -209,12 +197,20 @@ class Game(models.Model):
                 current = self.current_round
                 current.__setattr__(self.active_piece + '_loc', id2)
                 piece = self.dets.get(role=self.active_piece)
-                give_to_x = getattr(self.mrx, ticket)
-                give_to_x += 1
+                num = getattr(self.mrx, ticket)
+                num += 1
+                setattr(self.mrx, ticket, num)
                 self.save()
                 self.mrx.save()
                 self._move_helper(piece, ticket)
                 current.save()
+                if self._x_wins_by_turns(self):
+                    if self.player1_is_x:
+                        return self.player1
+                    else:
+                        return self.player2
+        else:
+            return self.validate_move(id1, id2, ticket, user_profile)
 
     def _move_helper(self, piece, ticket):
         num = getattr(piece, ticket)
@@ -300,6 +296,14 @@ class Game(models.Model):
     def _check_capture(self, id2, occupied):
         """Check if a detective has moved on to mrx - if yes, return player"""
         occupied = self.get_locations()
+        if self.active_piece == 'mrx':
+            for name, value in occupied:
+                if id2 == value:
+                    if self.player1_is_x:
+                        return self.player_2
+                    else:
+                        return self.player_1
+
         if id2 == occupied['mrx']:
             return self.active_player
 
