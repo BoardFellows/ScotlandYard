@@ -12,18 +12,17 @@ class EndPointTests(APITestCase):
         """Set up User Endpoint tests."""
         self.selena = UserFactory.create(
             username='seleniumk',
-            email='test@foo.com'
+            email='s@foo.com'
         )
         self.selena.set_password('markdown')
-        self.selena.set_password('secret')
         self.patrick = UserFactory.create(
             username='ptrompeter',
-            email='test@foo.com'
+            email='p@foo.com'
         )
         self.patrick.set_password('beyonce')
         self.frasier = UserFactory.create(
-            username='ptrompeter',
-            email='test@foo.com'
+            username='frasier',
+            email='f@foo.com'
 
         )
         self.frasier.set_password('tswift')
@@ -36,24 +35,26 @@ class EndPointTests(APITestCase):
 
         )
         self.game2 = GameFactory.create(
-            host=self.frasier,
-            player_1=self.frasier,
+            host=self.frasier.profile,
+            player_1=self.frasier.profile,
             player_2=self.patrick.profile,
         )
+        self.client = APIClient(enforce_csrf_checks=True)
 
     def test_post_users_list(self):
         """Assert that POST /users/ creates a new user."""
-        self.assertEqual(User.objects.count(), 2)
+        self.assertEqual(User.objects.count(), 3)
         url = '/users/'
         data = {'username': 'Phil', 'email': 'test@foo.com', 'password': 'something'}
-        client = APIClient(enforce_csrf_checks=True)
-        request = client.post(url, data, format='json')
+        request = self.client.post(url, data, format='json')
         self.assertEqual(request.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(User.objects.count(), 3)
+        self.assertEqual(User.objects.count(), 4)
 
     def test_get_board(self):
         """Assert that GET /board returns a JSON representation of the board."""
-        pass
+        request = self.client.get('/board')
+        self.assertEqual(request.status_code, status.HTTP_200_CREATED)
+        
 
     def test_get_users_list(self):
         """Assert that GET /users/ with works with basic auth."""

@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from syard_main.models import Game, UserProfile
+from syard_main.models import Game
 from syard_api.helper import get_auth_user
-
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -70,4 +69,5 @@ class GameSerializer(serializers.ModelSerializer):
         next_node = request_data['nodeId']
         ticket = request_data['tokenType']
         instance.move_piece(cur_node, next_node, ticket, player_profile)
+        instance.save()
         return instance
