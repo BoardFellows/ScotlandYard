@@ -204,7 +204,7 @@ class Game(models.Model):
                 self.mrx.save()
                 self._move_helper(piece, ticket)
                 current.save()
-                if self._x_wins_by_turns(self):
+                if self._x_wins_by_turns():
                     if self.player1_is_x:
                         return self.player1
                     else:
@@ -297,7 +297,7 @@ class Game(models.Model):
         """Check if a detective has moved on to mrx - if yes, return player"""
         occupied = self.get_locations()
         if self.active_piece == 'mrx':
-            for name, value in occupied:
+            for name, value in occupied.items():
                 if id2 == value:
                     if self.player1_is_x:
                         return self.player_2

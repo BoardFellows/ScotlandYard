@@ -324,7 +324,7 @@ class MethodsCase(TestCase):
         #  tests that a valid move without a matching ticket fails
         self.assertIsNot(94, current_round.mrx_loc)
 
-    def test__wrong_player(self):
+    def test_wrong_player(self):
 
         rnd = self.game_1.current_round
         rnd.mrx_loc = 75
@@ -334,6 +334,31 @@ class MethodsCase(TestCase):
         self.game_1.move_piece(75, 94, 'taxi', wrong_player)
         self.assertIsNot(94, rnd.mrx_loc)
         self.assertIs(75, rnd.mrx_loc)
+
+    def test_x_suicide(self):
+        current_round = self.game_1.current_round
+        current_round.mrx_loc = 75
+        current_round.det1_loc = 94
+        current_round.save()
+        new_round = Round(game=self.game_1, num=(self.game_1.round_number + 1))
+        new_round.save()
+        self.assertEquals(self.game_1.move_piece(75, 94, 'taxi', self.user_1.profile), self.game_1.player_2)
+
+    def test_x_captured(self):
+        current_round = self.game_1.current_round
+        current_round.det1_loc = 94
+        current_round.save()
+        new_round = Round(game=self.game_1, num=(self.game_1.round_number + 1))
+        new_round.save()
+        current_round = self.game_1.current_round
+        current_round.mrx_loc = 75
+        current_round.save()
+        self.assertEquals(self.game_1.move_piece(94, 75, 'taxi', self.user_2.profile), self.game_1.player_2)
+
+    def test_x_wins_by_turns(self):
+        self.game_1.round_number = 22
+        self.assertTrue(self.game_1._x_wins_by_turns())
+
 
 
 """Test BOARD"""
