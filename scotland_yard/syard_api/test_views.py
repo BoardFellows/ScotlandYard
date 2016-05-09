@@ -3,6 +3,7 @@ from rest_framework.test import APITestCase, APIClient
 from django.contrib.auth.models import User
 from syard_api.test_factory import UserFactory, GameFactory
 from syard_main.models import Round
+from syard_main.board import BOARD
 import json
 
 
@@ -42,6 +43,7 @@ class EndPointTests(APITestCase):
         )
         self.client = APIClient(enforce_csrf_checks=True)
 
+    # erroring. I don't know why. Throws a key error on password.
     def test_post_users_list(self):
         """Assert that POST /users/ creates a new user."""
         self.assertEqual(User.objects.count(), 3)
@@ -55,13 +57,11 @@ class EndPointTests(APITestCase):
         """Assert that GET /board returns a JSON representation of the board."""
         request = self.client.get('/board')
         self.assertEqual(request.status_code, status.HTTP_200_OK)
-
+        self.assertEqual(request.content, str.encode(json.dumps(BOARD)))
 
 
     def test_get_users_list(self):
         """Assert that GET /users/ with works with basic auth."""
-        request = self.client.get('/board')
-        self.assertEqual(request.status_code, status.HTTP_200_OK)
         pass
 
     def test_get_users_list_fails(self):
