@@ -13,7 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         depth = 1
         fields = (
-            'id', 'username', 'email', 'password', 'profile',
+            'id', 'username', 'email', 'profile',
         )
         # TODO: Check with F. What fields does he need?
 
@@ -31,6 +31,11 @@ class UserSerializer(serializers.ModelSerializer):
 class GameSerializer(serializers.ModelSerializer):
     """Serialization of games."""
 
+    locations = serializers.SerializerMethodField()
+
+    def get_locations(self, obj):
+        return obj.get_locations
+
     class Meta:
         """Meta."""
 
@@ -39,7 +44,7 @@ class GameSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'host', 'date_created',
             'date_modified', 'player_1', 'player_2',
-            'round_number', 'rounds',
+            'round_number', 'rounds', 'locations',
             'complete', 'winner'
         )
 
@@ -52,7 +57,6 @@ class GameSerializer(serializers.ModelSerializer):
         game = Game(
             host=player1,
             player1_is_x=request.data['gameCreatorIsMrX'],
-            player_1=player1,
         )
         game.save()
         game.set_players(player1, player2)
@@ -60,13 +64,12 @@ class GameSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """Update current round of game."""
-        request_data = self.context['request'].data
-        player_profile = get_auth_user(self.context['request'], token_only=True).profile
-        role = request_data['player'] 
+        request = self.context['request']
+        player_profile = get_auth_user(request, token_only=True).profile
+        role = request.data['player']
         cur_node = instance.get_locations()[role]
-        next_node = int(request_data['nodeId'])
+        next_node = int(request.datadata['nodeId'])
         ticket = request_data['tokenType']
         instance.move_piece(cur_node, next_node, ticket, player_profile)
         instance.save()
-        print(instance.current_round.mrx_loc)
         return instance
