@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from syard_api.test_factory import UserFactory, GameFactory
 from syard_main.models import Round
 from syard_main.board import BOARD
+from rest_framework.test import force_authenticate
 import json
 
 
@@ -60,9 +61,14 @@ class EndPointTests(APITestCase):
         self.assertEqual(request.content, str.encode(json.dumps(BOARD)))
 
 
-    def test_get_users_list(self):
-        """Assert that GET /users/ with works with basic auth."""
-        pass
+# haven't figured out how to verify auth
+    # def test_get_users_list(self):
+        # """Assert that GET /users/ with works with basic auth."""
+        # self.client.credentials(HTTP_AUTHORIZATION="Basic cHRyb21wZXRlcjpiZXlvbmNl")
+        # self.client.force_authenticate(user=User.objects.get(username="ptrompeter"))
+        # request = self.client.get('/users/')
+        # self.assertEqual(request.status_code, status.HTTP_200_OK)
+
 
     def test_get_users_list_fails(self):
         """Assert that GET /users/ fails without basic auth."""
